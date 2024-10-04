@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
-use serde_derive::{Serialize, Deserialize};
-
+mod error;
 mod types;
 
 trait ApsdeSap {
@@ -26,7 +25,6 @@ struct ApsdeSapRequest {
     radius_counter: u8
 }
 
-#[derive(Serialize, Deserialize)]
 enum ApsdeSapConfirmStatus {
     Success, 
     NoShortAddress, 
@@ -45,13 +43,11 @@ struct ApsdeSapConfirm {
     tx_time: u8,
 }
 
-#[derive(Serialize, Deserialize)]
 enum ApsdeSapIndicationStatus {
     Success, 
     DefragUnsupported, 
     DefragDeferred
 }
-#[derive(Serialize, Deserialize)]
 enum SecurityStatus {
     Unsecured, 
     SecuredNwkKey, 

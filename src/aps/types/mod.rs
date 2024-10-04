@@ -1,15 +1,17 @@
 //! Bounded address
 //! 2.2.4.1.1
+
+use super::error::ApsError;
 pub struct SrcEndpoint {
     value: u8
 }
 
 impl SrcEndpoint {
-    pub fn new(value: u8) -> Result<Self, String> {
+    pub fn new(value: u8) -> Result<Self, ApsError> {
         if value <= 254 {
             Ok(SrcEndpoint { value })
         } else {
-            Err(format!("Value {} is not within the valid range 0x00 – 0xfe", value))
+            Err(ApsError::InvalidValue)
         }
     }
 }
