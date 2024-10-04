@@ -6,7 +6,7 @@ pub struct SrcEndpoint {
 
 impl SrcEndpoint {
     pub fn new(value: u8) -> Result<Self, String> {
-        if value >= 2 && value <= 100 {
+        if value <= 254 {
             Ok(SrcEndpoint { value })
         } else {
             Err(format!("Value {} is not within the valid range 0x00 – 0xfe", value))
@@ -20,15 +20,15 @@ mod tests {
     use super::*;
 
     #[test]
-    fn undersized_value_should_fail() {
-        let src_endpoint = SrcEndpoint::new(1);
+    fn valid_value_should_succeed() {
+        let src_endpoint = SrcEndpoint::new(254);
 
-        assert!(src_endpoint.is_err());
+        assert!(src_endpoint.is_ok());
     }
 
     #[test]
     fn oversized_value_should_fail() {
-        let src_endpoint = SrcEndpoint::new(101);
+        let src_endpoint = SrcEndpoint::new(255);
 
         assert!(src_endpoint.is_err());
     }
