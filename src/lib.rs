@@ -2,7 +2,5 @@
 //!
 //! ZigBee is a protocol stack based on the ZigBee specification 22 1.0
 //!
-mod lib {
-
-}
-
+#![no_std]
+pub mod nwk;
