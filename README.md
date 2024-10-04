@@ -4,7 +4,7 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/thebino/zigbee-rs?color=success&style=for-the-badge)](https://github.com/thebino/zigbee-rs/graphs/contributors)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/thebino/zigbee-rs/ci.yaml?style=for-the-badge)
 ![ZigBee](https://img.shields.io/badge/zigbee-22.1.0-blue?color=4285F4&logo=zigbee&style=for-the-badge)
-![Rust](https://img.shields.io/badge/rust-2021-orange?color=E45928&logo=rust&style=for-the-badge)
+![Rust](https://img.shields.io/badge/rust-2018-orange?color=E45928&logo=rust&style=for-the-badge)
 
 The ZigBee protocol stack to integrate ZigBee communication into an application.
 
