@@ -1,4 +1,7 @@
-#![allow(dead_code)]
+//! 
+//! 2.2.4.4 Information Base Maintenance
+//! This set of primitives defines how the next higher layer of a device can read and write attributes in the AIB
+//!
 use crate::aps::types;
 
 type DstAddrMode = u8;
@@ -87,4 +90,20 @@ struct ApsmeGetConfirm {
     attribute_length: u8,
     attribute_value: AIBAttributeValue,
 }
+
+// 2.2.4.4.3 APSME-SET.request
+struct ApsmeSetRequest {
+    attribute: AIBAttribute,
+    attribute_length: u8,
+    attribute_value: AIBAttributeValue,
+}
+
+// 2.2.4.4.4 APSME-SET.confirm
+struct ApsmeSetConfirm {
+    status: u8,
+    attribute: AIBAttribute,
+    attribute_length: u8,
+    attribute_value: AIBAttributeValue,
+}
+
 
