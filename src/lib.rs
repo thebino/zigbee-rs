@@ -1,8 +1,6 @@
-//! # zigbee
+//! Implements the ZigBee protocol stack in `no-std` based on the [ZigBee specification]
 //!
-//! ZigBee is a protocol stack based on the ZigBee specification 22 1.0
+//! [ZigBee specification]: https://csa-iot.org/wp-content/uploads/2022/01/docs-05-3474-22-0csg-zigbee-specification-1.pdf
 //!
-mod lib {
-
-}
+#![no_std]
 
