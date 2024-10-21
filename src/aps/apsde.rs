@@ -1,9 +1,20 @@
 #![allow(dead_code)]
 use crate::aps::types;
 
+// 2.2.4.1
+// Application support sub-layer data entity – service access point
+//
+// Interface between the NWK (Network) layer and the APL (Application) layer
+// through a general set of services for use by both the ZDO (device object) and the application.
+pub(crate) trait ApsdeSap {
+    fn data_request(request: ApsdeSapRequest) -> ApsdeSapConfirm;
+}
+
+
+
 type DstAddrMode = u8;
 // 2.2.4.1.1
-struct ApsdeSapRequest {
+pub(crate) struct ApsdeSapRequest {
     dst_addr_mode: DstAddrMode,
     dst_address: u8,
     dst_endpoint: u8,
@@ -28,7 +39,7 @@ enum ApsdeSapConfirmStatus {
     AsduTooLong
 }
 // 2.2.4.1.2
-struct ApsdeSapConfirm {
+pub(crate) struct ApsdeSapConfirm {
     dst_addr_mode: DstAddrMode,
     dst_address: u8,
     dst_endpoint: u8,

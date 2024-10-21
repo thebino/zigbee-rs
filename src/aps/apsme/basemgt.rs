@@ -6,7 +6,7 @@ use crate::aps::types;
 
 type DstAddrMode = u8;
 // 2.2.4.3.1 APSME-BIND.request
-struct ApsmeBindRequest {
+pub(crate) struct ApsmeBindRequest {
     src_address: u64,
     src_endpoint: types::SrcEndpoint,
     cluster_id: u16,
@@ -23,7 +23,7 @@ enum ApsmeBindRequestStatus {
 }
 
 // 2.2.4.3.2 APSME-BIND.confirm
-struct ApsmeBindConfirm {
+pub(crate) struct ApsmeBindConfirm {
     status: ApsmeBindRequestStatus,
     src_address: u64,
     src_endpoint: types::SrcEndpoint,
@@ -59,7 +59,7 @@ struct ApsmeUnbindConfirm {
     dst_endpoint: u8,
 }
 
-enum AIBAttribute {
+pub(crate) enum AIBAttribute {
     IapsBindingTable = 0xc1,
     ApsDesignatedCoordinator = 0xc2,
     ApsChannelMaskList = 0xc3,
@@ -80,7 +80,7 @@ struct ApsmeGetRequest {
     attribute: AIBAttribute
 }
 
-struct AIBAttributeValue {
+pub(crate) struct AIBAttributeValue {
 
 }
 
