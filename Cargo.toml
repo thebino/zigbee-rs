@@ -16,4 +16,5 @@ license = "MIT OR Apache-2.0"
 [features]
 
 [dependencies]
+bitmaps = { version = "3.2.1", default-features = false }
 
