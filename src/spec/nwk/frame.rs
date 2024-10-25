@@ -5,19 +5,13 @@ use core::{
 
 use heapless::Vec;
 
-pub trait PackBytes
-where
-    Self: Sized,
-{
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self>;
-    fn unpack_from_slice(src: &[u8]) -> Option<Self> {
-        Self::unpack_from_iter(src.iter().cloned())
-    }
-}
+use crate::{impl_pack_bytes, parse::PackBytes};
 
 const PAYLOAD_CAP: usize = 128;
 
-pub struct ShortAddress(u16);
+impl_pack_bytes! {
+    pub struct ShortAddress(u16);
+}
 
 impl Debug for ShortAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -25,13 +19,9 @@ impl Debug for ShortAddress {
     }
 }
 
-impl PackBytes for ShortAddress {
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-        Some(Self(u16::unpack_from_iter(src)?))
-    }
+impl_pack_bytes! {
+    pub struct IeeeAddress(u64);
 }
-
-pub struct IeeeAddress(u64);
 
 impl Debug for IeeeAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -39,25 +29,13 @@ impl Debug for IeeeAddress {
     }
 }
 
-impl PackBytes for IeeeAddress {
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-        Some(Self(u64::unpack_from_iter(src)?))
-    }
-}
-
-#[derive(Debug)]
-pub struct NwkFrame {
-    pub header: NwkHeader,
-    pub payload: Vec<u8, PAYLOAD_CAP>,
-}
-
-impl PackBytes for NwkFrame {
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-        let mut src = src.into_iter();
-        Some(Self {
-            header: PackBytes::unpack_from_iter(&mut src)?,
-            payload: src.collect(),
-        })
+impl_pack_bytes! {
+    #[derive(Debug)]
+    pub struct NwkFrame {
+        #[transparent(NwkHeader)]
+        pub header: NwkHeader,
+        #[collect(Vec<u8, PAYLOAD_CAP>)]
+        pub payload: Vec<u8, PAYLOAD_CAP>,
     }
 }
 
@@ -117,28 +95,10 @@ impl PackBytes for NwkHeader {
     }
 }
 
-impl PackBytes for u16 {
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-        let buf: Vec<u8, 2> = src.into_iter().take(2).collect();
-        Some(u16::from_be_bytes(buf.into_array().unwrap()))
-    }
+impl_pack_bytes! {
+    /// 3.3.1.1 Frame Control Field
+    pub struct FrameControl(u16);
 }
-
-impl PackBytes for u64 {
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-        let buf: Vec<u8, 8> = src.into_iter().take(8).collect();
-        Some(u64::from_be_bytes(buf.into_array().unwrap()))
-    }
-}
-
-impl PackBytes for FrameControl {
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-        Some(Self(u16::unpack_from_iter(src)?))
-    }
-}
-
-/// 3.3.1.1 Frame Control Field
-pub struct FrameControl(u16);
 
 impl Debug for FrameControl {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -246,8 +206,10 @@ impl DiscoverRoute {
     }
 }
 
-/// 3.3.1.8 Multicast Control Field
-pub struct MulticastControl(u8);
+impl_pack_bytes! {
+    /// 3.3.1.8 Multicast Control Field
+    pub struct MulticastControl(u8);
+}
 
 impl Debug for MulticastControl {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -256,12 +218,6 @@ impl Debug for MulticastControl {
             .field("non_member_radius", &self.non_member_radius())
             .field("max_member_radius", &self.max_member_radius())
             .finish()
-    }
-}
-
-impl PackBytes for MulticastControl {
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-        Some(Self(src.into_iter().next()?))
     }
 }
 
@@ -297,63 +253,27 @@ pub enum MulticastMode {
 
 const RELAY_LIST_CAP: usize = 16;
 
-#[derive(Debug)]
-pub struct SourceRouteSubframe {
-    /// Indicates the number of relays contained in [`SourceRouteSubframe::relay_list`].
-    ///
-    /// See Section 3.3.1.9.1.
-    pub relay_count: u8,
-    /// Indicates the index of the next relay in [`SourceRouteSubframe::relay_list`] to
-    /// which the packet will be transmitted.
-    ///
-    /// See Section 3.3.1.9.2.
-    pub relay_index: u8,
-    /// List of relay addresses from closest to the destination to closest to the originator.
-    ///
-    /// See Section 3.3.1.9.2.
-    pub relay_list: Vec<u8, RELAY_LIST_CAP>,
-}
-
-impl PackBytes for SourceRouteSubframe {
-    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-        let mut src = src.into_iter();
-        Some(Self {
-            relay_count: src.next()?,
-            relay_index: src.next()?,
-            relay_list: src.collect(),
-        })
+impl_pack_bytes! {
+    #[derive(Debug)]
+    pub struct SourceRouteSubframe {
+        /// Indicates the number of relays contained in [`SourceRouteSubframe::relay_list`].
+        ///
+        /// See Section 3.3.1.9.1.
+        #[transparent(u8)]
+        pub relay_count: u8,
+        /// Indicates the index of the next relay in [`SourceRouteSubframe::relay_list`] to
+        /// which the packet will be transmitted.
+        ///
+        /// See Section 3.3.1.9.2.
+        #[transparent(u8)]
+        pub relay_index: u8,
+        /// List of relay addresses from closest to the destination to closest to the originator.
+        ///
+        /// See Section 3.3.1.9.2.
+        #[collect(Vec<u8, RELAY_LIST_CAP>)]
+        pub relay_list: Vec<u8, RELAY_LIST_CAP>,
     }
 }
-
-//impl PackedStructSlice for SourceRouteSubframe {
-//    fn pack_to_slice(&self, output: &mut [u8]) -> packed_struct::PackingResult<()> {
-//        let mut output = output.iter_mut();
-//        *output.next().ok_or(PackingError::BufferTooSmall)? = self.relay_count;
-//        *output.next().ok_or(PackingError::BufferTooSmall)? = self.relay_index;
-//        for l in &self.relay_list {
-//            *output.next().ok_or(PackingError::BufferTooSmall)? = *l
-//        }
-
-//        Ok(())
-//    }
-
-//    fn unpack_from_slice(src: &[u8]) -> packed_struct::PackingResult<Self> {
-//        let relay_count = src[0];
-//        let relay_index = src[1];
-//        let relay_list = &src[2..];
-//        Ok(Self {
-//            relay_count,
-//            relay_index,
-//            relay_list: Vec::from_slice(relay_list).map_err(|_| PackingError::BufferTooSmall)?,
-//        })
-//    }
-
-//    fn packed_bytes_size(opt_self: Option<&Self>) -> packed_struct::PackingResult<usize> {
-//        opt_self
-//            .map(|s| mem::size_of::<u8>() * 2 + s.relay_list.len())
-//            .ok_or(PackingError::InstanceRequiredForSize)
-//    }
-//}
 
 #[cfg(test)]
 mod tests {
