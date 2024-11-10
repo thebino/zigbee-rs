@@ -37,12 +37,12 @@ pub struct ApsmeBindConfirm {
 
 /// 2.2.4.3.3 - APSME-UNBIND.request
 pub struct ApsmeUnbindRequest {
-    src_address: Address,
-    src_endpoint: types::SrcEndpoint,
-    cluster_id: u16,
-    dst_addr_mode: DstAddrMode,
-    dst_address: u8,
-    dst_endpoint: u8,
+    pub(crate) src_address: Address,
+    pub(crate) src_endpoint: types::SrcEndpoint,
+    pub(crate) cluster_id: u16,
+    pub(crate) dst_addr_mode: DstAddrMode,
+    pub(crate) dst_address: u8,
+    pub(crate) dst_endpoint: u8,
 }
 
 pub enum ApsmeUnbindRequestStatus {
@@ -52,13 +52,13 @@ pub enum ApsmeUnbindRequestStatus {
 }
 /// 2.2.4.3.4 - APSME-UNBIND.confirm
 pub struct ApsmeUnbindConfirm {
-    status: ApsmeUnbindRequestStatus,
-    src_address: Address,
-    src_endpoint: types::SrcEndpoint,
-    cluster_id: u16,
-    dst_addr_mode: DstAddrMode,
-    dst_address: u8,
-    dst_endpoint: u8,
+    pub(crate) status: ApsmeUnbindRequestStatus,
+    pub(crate) src_address: Address,
+    pub(crate) src_endpoint: types::SrcEndpoint,
+    pub(crate) cluster_id: u16,
+    pub(crate) dst_addr_mode: DstAddrMode,
+    pub(crate) dst_address: u8,
+    pub(crate) dst_endpoint: u8,
 }
 
 pub enum AIBAttribute {

@@ -10,7 +10,7 @@
 //!
 #![allow(dead_code)]
 
-use basemgt::{AIBAttribute, AIBAttributeValue, ApsmeBindConfirm, ApsmeBindRequest, ApsmeBindRequestStatus};
+use basemgt::{AIBAttribute, AIBAttributeValue, ApsmeBindConfirm, ApsmeBindRequest, ApsmeBindRequestStatus, ApsmeUnbindConfirm, ApsmeUnbindRequest, ApsmeUnbindRequestStatus};
 use heapless::Vec;
 use super::types::Address;
 
@@ -26,7 +26,7 @@ pub trait ApsmeSap {
     /// 2.2.4.3.1 - request to bind two devices together, or to bind a device to a group
     fn bind_request(&mut self, request: ApsmeBindRequest) -> ApsmeBindConfirm;
     /// 2.2.4.3.3 - request to unbind two devices, or to unbind a device from a group
-    fn unbind_request();
+    fn unbind_request(&mut self, request: ApsmeUnbindRequest) -> ApsmeUnbindConfirm ;
     /// 2.2.4.4.1
     fn get(attribute: AIBAttribute) -> AIBAttributeValue;
     /// 2.2.4.4.3
@@ -40,6 +40,7 @@ pub trait ApsmeSap {
 }
 
 struct Apsme {
+    pub(crate) supports_binding_table: bool,
     // TODO: limit the size
     pub(crate) binding_table: Vec<Address, 265>,
     pub(crate) joined_network: Option<Address>
@@ -48,6 +49,7 @@ struct Apsme {
 impl  Apsme {
     fn new() -> Apsme {
         Self {
+            supports_binding_table: true,
             binding_table: Vec::new(),
             joined_network: None,
         }
@@ -65,7 +67,7 @@ impl  Apsme {
 
 impl ApsmeSap for Apsme {
     fn bind_request(&mut self, request: ApsmeBindRequest) -> ApsmeBindConfirm {
-        let status = if !self.is_joined() {
+        let status = if !self.is_joined() || !self.supports_binding_table {
             ApsmeBindRequestStatus::IllegalRequest
         } else if self.is_full() {
             ApsmeBindRequestStatus::TableFull
@@ -86,8 +88,25 @@ impl ApsmeSap for Apsme {
 
     }
 
-    fn unbind_request() {
-        todo!()
+    fn unbind_request(&mut self, request: ApsmeUnbindRequest) -> ApsmeUnbindConfirm {
+        let status = if !self.is_joined() || !self.supports_binding_table {
+            ApsmeUnbindRequestStatus::IllegalRequest
+        } else if !self.binding_table.contains(&request.src_address) {
+            ApsmeUnbindRequestStatus::InvalidBinding
+        } else {
+            ApsmeUnbindRequestStatus::Success
+
+        };
+
+        ApsmeUnbindConfirm {
+            status,
+            src_address: request.src_address,
+            src_endpoint: request.src_endpoint,
+            cluster_id: request.cluster_id,
+            dst_addr_mode: request.dst_addr_mode,
+            dst_address: request.dst_address,
+            dst_endpoint: request.dst_endpoint,
+        }
     }
 
     fn get(attribute: AIBAttribute) -> AIBAttributeValue {
@@ -122,6 +141,28 @@ mod tests {
     use crate::aps::types::SrcEndpoint;
 
     use super::*;
+
+    // 2.2.4.3.1
+    #[test]
+    fn bind_request_device_does_not_support_binding_should_fail() {
+        // given
+        let mut apsme = Apsme::new();
+        apsme.supports_binding_table = false;
+        let request = ApsmeBindRequest {
+            src_address: Address::Extended(0u64),
+            src_endpoint: SrcEndpoint::new(10).expect("Co"),
+            cluster_id: 1u16,
+            dst_addr_mode: 0u8,
+            dst_address: 1u8,
+            dst_endpoint: 2u8,
+        };
+
+        // when
+        let result = apsme.bind_request(request);
+
+        // then
+        assert_eq!(result.status, ApsmeBindRequestStatus::IllegalRequest);
+    }
 
     // 2.2.4.3.1
     #[test]
