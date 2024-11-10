@@ -1,42 +1,43 @@
 #![allow(dead_code)]
-//! 
+//!
 //! 2.2.4.4 Information Base Maintenance
 //! This set of primitives defines how the next higher layer of a device can read and write attributes in the AIB
 //!
-use crate::aps::types;
+use crate::aps::types::{self, Address};
 
 type DstAddrMode = u8;
 /// 2.2.4.3.1 - APSME-BIND.request
 pub struct ApsmeBindRequest {
-    src_address: u64,
-    src_endpoint: types::SrcEndpoint,
-    cluster_id: u16,
-    dst_addr_mode: DstAddrMode,
-    dst_address: u8,
-    dst_endpoint: u8,
+    pub src_address: Address,
+    pub src_endpoint: types::SrcEndpoint,
+    pub cluster_id: u16,
+    pub dst_addr_mode: DstAddrMode,
+    pub dst_address: u8,
+    pub dst_endpoint: u8,
 }
 
+#[derive(Debug, PartialEq)]
 pub enum ApsmeBindRequestStatus {
     Success,
     IllegalRequest,
     TableFull,
-    NotSupported
+    NotSupported,
 }
 
 /// 2.2.4.3.2 - APSME-BIND.confirm
 pub struct ApsmeBindConfirm {
-    status: ApsmeBindRequestStatus,
-    src_address: u64,
-    src_endpoint: types::SrcEndpoint,
-    cluster_id: u16,
-    dst_addr_mode: DstAddrMode,
-    dst_address: u8,
-    dst_endpoint: u8,
+    pub(crate) status: ApsmeBindRequestStatus,
+    pub src_address: Address,
+    pub src_endpoint: types::SrcEndpoint,
+    pub cluster_id: u16,
+    pub dst_addr_mode: DstAddrMode,
+    pub dst_address: u8,
+    pub dst_endpoint: u8,
 }
 
 /// 2.2.4.3.3 - APSME-UNBIND.request
 pub struct ApsmeUnbindRequest {
-    src_address: u64,
+    src_address: Address,
     src_endpoint: types::SrcEndpoint,
     cluster_id: u16,
     dst_addr_mode: DstAddrMode,
@@ -47,12 +48,12 @@ pub struct ApsmeUnbindRequest {
 pub enum ApsmeUnbindRequestStatus {
     Success,
     IllegalRequest,
-    InvalidBinding
+    InvalidBinding,
 }
 /// 2.2.4.3.4 - APSME-UNBIND.confirm
 pub struct ApsmeUnbindConfirm {
     status: ApsmeUnbindRequestStatus,
-    src_address: u64,
+    src_address: Address,
     src_endpoint: types::SrcEndpoint,
     cluster_id: u16,
     dst_addr_mode: DstAddrMode,
@@ -78,12 +79,10 @@ pub enum AIBAttribute {
 
 /// 2.2.4.4.1 - APSME-GET.request
 pub struct ApsmeGetRequest {
-    attribute: AIBAttribute
+    attribute: AIBAttribute,
 }
 
-pub struct AIBAttributeValue {
-
-}
+pub struct AIBAttributeValue {}
 /// 2.2.4.4.2 - APSME-GET.confirm
 pub struct ApsmeGetConfirm {
     status: u8,
@@ -108,29 +107,17 @@ pub struct ApsmeSetConfirm {
 }
 
 /// 2.2.4.5.1 - APSME-ADD-GROUP.request
-pub struct ApsmeAddGroupRequest {
-
-}
+pub struct ApsmeAddGroupRequest {}
 
 /// 2.2.4.5.2 - APSME-ADD-GROUP.confirm
-pub struct ApsmeAddGroupConfirm {
-
-}
+pub struct ApsmeAddGroupConfirm {}
 
 /// 2.2.4.5.3 - APSME-REMOVE-GROUP.request
-pub struct ApsmeRemoveGroupRequest {
-
-}
+pub struct ApsmeRemoveGroupRequest {}
 /// 2.2.4.5.3 - APSME-REMOVE-GROUP.request
-pub struct ApsmeRemoveGroupConfirm {
-
-}
+pub struct ApsmeRemoveGroupConfirm {}
 
 /// 2.2.4.5.5 - APSME-REMOVE-ALL-GROUPS.request
-pub struct ApsmeRemoveAllGroupsRequest {
-
-}
+pub struct ApsmeRemoveAllGroupsRequest {}
 /// 2.2.4.5.6 - APSME-REMOVE-ALL-GROUPs.request
-pub struct ApsmeRemoveAllGroupsConfirm {
-
-}
+pub struct ApsmeRemoveAllGroupsConfirm {}

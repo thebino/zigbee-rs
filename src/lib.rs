@@ -8,4 +8,3 @@
 /// (Network layer) and the `apl` (Application layer) through a general set of services that are
 /// used by both the `zdo` (Zigbee device object) and the application objects.
 pub mod aps;
-

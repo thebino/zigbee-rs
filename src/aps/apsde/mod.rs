@@ -1,6 +1,20 @@
+//! Application Support Sub-Layer Data Entity
+//!
+//! The APSDE shall provide a data service to the network layer and both ZDO and application
+//! objects to enable the transport of application PDUs between two or more devices.
+//!
+//! it will provide:
+//! * Generation of the application level PDU (APDU)
+//! * Binding
+//! * Group address filtering
+//! * Reliable transport
+//! * Duplicate rejection
+//! * Fragmentation
+//!
 #![allow(dead_code)]
 use crate::aps::types;
 
+use super::types::{Address, DstAddrMode, SrcAddrMode, TxOptions};
 
 /// Application support sub-layer data entity – service access point
 ///
@@ -13,40 +27,37 @@ pub trait ApsdeSap {
     fn data_request(&self, request: ApsdeSapRequest) -> ApsdeSapConfirm;
 }
 
-
-type DstAddrMode = u8;
 // 2.2.4.1.1
 pub struct ApsdeSapRequest {
     dst_addr_mode: DstAddrMode,
-    dst_address: u8,
+    dst_address: Address,
     dst_endpoint: u8,
     profile_id: u16,
     cluster_id: u16,
     src_endpoint: types::SrcEndpoint,
     asdulength: u8,
     asdu: u8,
-    tx_options: bitmaps::Bitmap<8>,
+    tx_options: TxOptions,
     use_alias: bool,
     alias_src_addr: u16,
     alias_seq_number: u8,
-    radius_counter: u8
+    radius_counter: u8,
 }
-
 
 /// The status of the corresponding request.
 pub enum ApsdeSapConfirmStatus {
     /// indicating that the request to transmit was successful
-    Success, 
+    Success,
     /// No corresponding 16-bit NKW address found
-    NoShortAddress, 
+    NoShortAddress,
     /// No binding table entries found with the respectively SrcEndpoint and ClusterId parameter
-    NoBoundDevice, 
+    NoBoundDevice,
     /// the security processing failed
     SecurityFail,
     /// one or more APS acknowledgements were not correctly received
-    NoAck, 
+    NoAck,
     /// ASDU to be transmitted is larger than will fit in a single frame and fragmentation is not possible
-    AsduTooLong
+    AsduTooLong,
 }
 // 2.2.4.1.2
 pub struct ApsdeSapConfirm {
@@ -59,15 +70,15 @@ pub struct ApsdeSapConfirm {
 }
 
 pub enum ApsdeSapIndicationStatus {
-    Success, 
-    DefragUnsupported, 
-    DefragDeferred
+    Success,
+    DefragUnsupported,
+    DefragDeferred,
 }
 
 pub enum SecurityStatus {
-    Unsecured, 
-    SecuredNwkKey, 
-    SecuredLinkKey
+    Unsecured,
+    SecuredNwkKey,
+    SecuredLinkKey,
 }
 
 // 2.2.4.1.3
@@ -75,7 +86,7 @@ pub struct ApsdeSapIndication {
     dst_addr_mode: DstAddrMode,
     dst_address: u8,
     dst_endpoint: u8,
-    src_addr_mode: u8,
+    src_addr_mode: SrcAddrMode,
     src_address: u64,
     src_endpoint: types::SrcEndpoint,
     profile_id: u16,
@@ -86,4 +97,3 @@ pub struct ApsdeSapIndication {
     link_quality: u8,
     rx_time: u8,
 }
-

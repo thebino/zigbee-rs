@@ -1,9 +1,36 @@
-//! Bounded address
-//! 2.2.4.1.1
+#![allow(dead_code)]
+pub enum SrcAddrMode {
+    Reserved = 0x00,
+    Short = 0x01,
+    Extended = 0x02,
+}
+
+pub enum DstAddrMode {
+    None = 0x00,
+    Group = 0x01,
+    Network = 0x02,
+    Extended = 0x03,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum Address {
+    Nono,
+    Group(u16),
+    Network(u16),
+    Extended(u64),
+}
+
+pub enum TxOptions {
+    SecurityEnabled = 0x01,
+    UseNetworkKey = 0x02,
+    Acknowledged = 0x04,
+    FragmentationPermitted = 0x08,
+    IncludeExtendedNonce = 0x10,
+}
 
 use super::error::ApsError;
 pub struct SrcEndpoint {
-    value: u8
+    value: u8,
 }
 
 impl SrcEndpoint {
@@ -15,7 +42,6 @@ impl SrcEndpoint {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -35,4 +61,3 @@ mod tests {
         assert!(src_endpoint.is_err());
     }
 }
-
