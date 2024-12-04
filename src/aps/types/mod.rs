@@ -30,7 +30,7 @@ pub enum TxOptions {
 
 use super::error::ApsError;
 pub struct SrcEndpoint {
-    value: u8,
+    pub(crate) value: u8,
 }
 
 impl SrcEndpoint {

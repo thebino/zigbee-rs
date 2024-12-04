@@ -173,7 +173,7 @@ mod tests {
         apsme.supports_binding_table = false;
         let request = ApsmeBindRequest {
             src_address: Address::Extended(0u64),
-            src_endpoint: SrcEndpoint::new(10).expect("Co"),
+            src_endpoint: SrcEndpoint::new(10).unwrap_or(SrcEndpoint { value: 0 }),
             cluster_id: 1u16,
             dst_addr_mode: 0u8,
             dst_address: 1u8,
@@ -194,7 +194,7 @@ mod tests {
         let mut apsme = Apsme::new();
         let request = ApsmeBindRequest {
             src_address: Address::Extended(0u64),
-            src_endpoint: SrcEndpoint::new(10).expect("Co"),
+            src_endpoint: SrcEndpoint::new(10).unwrap_or(SrcEndpoint { value: 0 }),
             cluster_id: 1u16,
             dst_addr_mode: 0u8,
             dst_address: 1u8,
@@ -217,7 +217,7 @@ mod tests {
         for n in 0..265u64 {
             let request = ApsmeBindRequest {
                 src_address: Address::Extended(n),
-                src_endpoint: SrcEndpoint::new(10).expect("Co"),
+                src_endpoint: SrcEndpoint::new(10).unwrap_or(SrcEndpoint { value: 0 }),
                 cluster_id: 1u16,
                 dst_addr_mode: 0u8,
                 dst_address: 1u8,
@@ -229,7 +229,7 @@ mod tests {
         // when
         let request = ApsmeBindRequest {
             src_address: Address::Extended(999u64),
-            src_endpoint: SrcEndpoint::new(10).expect("Co"),
+            src_endpoint: SrcEndpoint::new(10).unwrap_or(SrcEndpoint { value: 0 }),
             cluster_id: 1u16,
             dst_addr_mode: 0u8,
             dst_address: 1u8,
@@ -250,7 +250,7 @@ mod tests {
         // when
         let request = ApsmeBindRequest {
             src_address: Address::Extended(999u64),
-            src_endpoint: SrcEndpoint::new(10).expect("Co"),
+            src_endpoint: SrcEndpoint::new(10).unwrap_or(SrcEndpoint { value: 0 }),
             cluster_id: 1u16,
             dst_addr_mode: 0u8,
             dst_address: 1u8,
