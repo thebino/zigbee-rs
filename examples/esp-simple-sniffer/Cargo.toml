@@ -1,0 +1,34 @@
+[package]
+name = "esp-simple-sniffer"
+version = "0.1.0"
+authors = ["Patrick Willner <50421879+heat1q@users.noreply.github.com>"]
+edition = "2021"
+
+[dependencies]
+byte = "0.2.7"
+esp-backtrace = { version = "0.14.0", features = [
+    "esp32c6",
+    "exception-handler",
+    "panic-handler",
+    "println",
+] }
+esp-hal = { version = "0.22.0", features = [ "esp32c6" ] }
+esp-ieee802154 = { version = "0.4.0", features = ["esp32c6"] }
+esp-println = { version = "0.12.0", features = ["esp32c6", "log"] }
+esp-wifi-sys = { version = "0.7.0", features = ["esp32c6"] }
+hex = { version = "0.4.3", default-features = false }
+ieee802154 = "0.6.1"
+log = { version = "0.4.21" }
+zigbee-rs = { path = "../.."}
+
+[profile.dev]
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1 
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false
