@@ -10,9 +10,9 @@
 //!
 #![allow(dead_code)]
 
-use basemgt::{AIBAttribute, AIBAttributeValue, ApsmeBindConfirm, ApsmeBindRequest, ApsmeBindRequestStatus, ApsmeGetConfirm, ApsmeGetConfirmStatus, ApsmeUnbindConfirm, ApsmeUnbindRequest, ApsmeUnbindRequestStatus};
+use basemgt::{ApsmeAddGroupConfirm, ApsmeAddGroupRequest, ApsmeBindConfirm, ApsmeBindRequest, ApsmeBindRequestStatus, ApsmeGetConfirm, ApsmeGetConfirmStatus, ApsmeRemoveAllGroupsConfirm, ApsmeRemoveAllGroupsRequest, ApsmeRemoveGroupConfirm, ApsmeRemoveGroupRequest, ApsmeSetConfirm, ApsmeUnbindConfirm, ApsmeUnbindRequest, ApsmeUnbindRequestStatus};
 use heapless::Vec;
-use super::types::Address;
+use super::{aib::{AIBAttribute, ApsInformationBase}, types::Address};
 
 pub mod basemgt;
 pub mod groupmgt;
@@ -27,24 +27,25 @@ pub trait ApsmeSap {
     fn bind_request(&mut self, request: ApsmeBindRequest) -> ApsmeBindConfirm;
     /// 2.2.4.3.3 - request to unbind two devices, or to unbind a device from a group
     fn unbind_request(&mut self, request: ApsmeUnbindRequest) -> ApsmeUnbindConfirm ;
-    /// 2.2.4.4.1
-    fn get(&self, attribute: AIBAttribute) -> ApsmeGetConfirm;
-    /// 2.2.4.4.3
-    fn set();
-    /// 2.2.4.5.1
-    fn add_group();
-    /// 2.2.4.5.1
-    fn remove_group();
-    /// 2.2.4.5.5
-    fn remove_all_groups();
+    /// 2.2.4.4.1 - APSME-GET.request
+    fn get(&self, attribute: u8) -> ApsmeGetConfirm;
+    /// 2.2.4.4.3 - APSME-SET.request
+    fn set(&self, attribute: AIBAttribute) -> ApsmeSetConfirm;
+    /// 2.2.4.5.1 - APSME-ADD-GROUP.request
+    fn add_group(&self, request: ApsmeAddGroupRequest) -> ApsmeAddGroupConfirm;
+    /// 2.2.4.5.3 - APSME-REMOVE-GROUP.request
+    fn remove_group(&self, request: ApsmeRemoveGroupRequest) -> ApsmeRemoveGroupConfirm;
+    /// 2.2.4.5.5 - APSME-REMOVE-ALL-GROUPS.request
+    fn remove_all_groups(&self, request: ApsmeRemoveAllGroupsRequest) -> ApsmeRemoveAllGroupsConfirm;
 }
 
 struct Apsme {
     pub(crate) supports_binding_table: bool,
+    // 2.2.8.1 Binding Table Implementation
     // TODO: limit the size
     pub(crate) binding_table: Vec<Address, 265>,
     pub(crate) joined_network: Option<Address>,
-    pub(crate) database: Vec<AIBAttribute, 265>,
+    pub(crate) database: ApsInformationBase,
 }
 
 impl  Apsme {
@@ -53,28 +54,36 @@ impl  Apsme {
             supports_binding_table: true,
             binding_table: Vec::new(),
             joined_network: None,
-            database: Vec::new(),
+            database: ApsInformationBase::new(),
         }
     }
     fn is_joined(&self) -> bool {
         self.joined_network.is_some()
     }
-    fn is_full(&self) -> bool {
-        self.binding_table.len() >= self.binding_table.capacity()
+
+    // 2.2.8.2.2 Binding
+    fn add_binding(&mut self, address: Address) -> Result<(), &'static str> {
+        self.binding_table.push(address).map_err(|_| "Binding table is full")
     }
-    fn add_entry(&mut self, address: Address) -> Result<(), Address> {
-        self.binding_table.push(address)
+    fn remove_binding(&mut self, address: Address) -> Result<(), &'static str> {
+        self.binding_table.retain(|addr| addr != &address);
+
+        Ok(())
+    }
+    fn is_binding_table_full(&self) -> bool {
+        self.binding_table.len() >= self.binding_table.capacity()
     }
 }
 
 impl ApsmeSap for Apsme {
+    /// 2.2.4.3.1 - request to bind two devices together, or to bind a device to a group
     fn bind_request(&mut self, request: ApsmeBindRequest) -> ApsmeBindConfirm {
         let status = if !self.is_joined() || !self.supports_binding_table {
             ApsmeBindRequestStatus::IllegalRequest
-        } else if self.is_full() {
+        } else if self.is_binding_table_full() {
             ApsmeBindRequestStatus::TableFull
         } else {
-            self.add_entry(request.src_address.clone()).expect("Could not add entry in binding table");
+            self.add_binding(request.src_address.clone()).expect("Could not add entry in binding table");
             ApsmeBindRequestStatus::Success
         };
 
@@ -87,9 +96,9 @@ impl ApsmeSap for Apsme {
             dst_address: request.dst_address,
             dst_endpoint: request.dst_endpoint,
         }
-
     }
 
+    /// 2.2.4.3.3 - request to unbind two devices, or to unbind a device from a group
     fn unbind_request(&mut self, request: ApsmeUnbindRequest) -> ApsmeUnbindConfirm {
         let status = if !self.is_joined() || !self.supports_binding_table {
             ApsmeUnbindRequestStatus::IllegalRequest
@@ -111,51 +120,51 @@ impl ApsmeSap for Apsme {
         }
     }
 
-    fn get(&self, attribute: AIBAttribute) -> ApsmeGetConfirm {
-        ApsmeGetConfirm {
-            status: ApsmeGetConfirmStatus::UnsupportedAttribute,
-            attribute,
-            attribute_length: 0u8,
-            attribute_value: AIBAttributeValue {},
+    // 2.2.4.4.1 APSME-GET.request
+    fn get(&self, identifier: u8) -> ApsmeGetConfirm {
+        let attr = self.database.get_attribute(identifier);
+        return match attr {
+            Some(attr) => ApsmeGetConfirm {
+                status: ApsmeGetConfirmStatus::Success,
+                attribute: attr.id(),
+                attribute_length: attr.length(),
+                attribute_value: Some(attr.value()),
+            },
+            None => ApsmeGetConfirm {
+                status: ApsmeGetConfirmStatus::UnsupportedAttribute,
+                attribute: identifier,
+                attribute_length: 0,
+                attribute_value: None,
+            },
         }
-        // let attr = self.database.get(attribute);
-        // return if attr.is_none() {
-            // return ApsmeGetConfirm {
-            //     status: ApsmeGetConfirmStatus::UnsupportedAttribute,
-            //     attribute: attribute,
-            //     attribute_length: attr.len(),
-            //     attribute_value: todo!(),
-            // }
-        // } else {
-        //     ApsmeGetConfirm {
-        //         status: ApsmeGetConfirmStatus::Success,
-        //         attribute: attr.unwrap(),
-        //         attribute_length: attr.len(),
-        //         attribute_value: todo!(),
-        //     }
-        // }
     }
 
-    fn set() {
+    // 2.2.4.4.3 APSME-SET.request
+    fn set(&self, attribute: AIBAttribute) -> ApsmeSetConfirm {
+        match self.database.write_attribute_value(attribute.id(), attribute.value()) {
+            Ok(_) => ApsmeSetConfirm {
+                status: basemgt::ApsmeSetConfirmStatus::Success,
+                identifier: attribute.id(),
+            },
+            Err(_) => todo!()
+        }
+    }
+
+    /// 2.2.4.5.1 - APSME-ADD-GROUP.request
+    fn add_group(&self, _request: ApsmeAddGroupRequest) -> ApsmeAddGroupConfirm {
+        ApsmeAddGroupConfirm {}
+    }
+
+    /// 2.2.4.5.3 - APSME-REMOVE-GROUP.request
+    fn remove_group(&self, _request: ApsmeRemoveGroupRequest) -> ApsmeRemoveGroupConfirm {
         todo!()
     }
 
-    fn add_group() {
-        todo!()
-    }
-
-    fn remove_group() {
-        todo!()
-    }
-
-    fn remove_all_groups() {
+    /// 2.2.4.5.5 - APSME-REMOVE-ALL-GROUPS.request
+    fn remove_all_groups(&self, _request: ApsmeRemoveAllGroupsRequest) -> ApsmeRemoveAllGroupsConfirm {
         todo!()
     }
 }
-
-// TODO: add AIB (APS information base) a database of managed objects
-//
-// 2.2.4.4.1
 
 #[cfg(test)]
 mod tests {

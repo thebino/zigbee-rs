@@ -3,7 +3,7 @@
 //! 2.2.4.4 Information Base Maintenance
 //! This set of primitives defines how the next higher layer of a device can read and write attributes in the AIB
 //!
-use crate::aps::types::{self, Address};
+use crate::aps::{aib::{AIBAttribute, AIBAttributeValue}, types::{self, Address}};
 
 type DstAddrMode = u8;
 /// 2.2.4.3.1 - APSME-BIND.request
@@ -61,35 +61,18 @@ pub struct ApsmeUnbindConfirm {
     pub(crate) dst_endpoint: u8,
 }
 
-#[derive(Debug, PartialEq)]
-pub enum AIBAttribute {
-    IapsBindingTable = 0xc1,
-    ApsDesignatedCoordinator = 0xc2,
-    ApsChannelMaskList = 0xc3,
-    ApsUseExtendedPANID = 0xc4,
-    ApsGroupTable = 0xc5,
-    ApsNonmemberRadius = 0xc6,
-    ApsUseInsecureJoin = 0xc8,
-    ApsInterframeDelay = 0xc9,
-    ApsLastChannelEnergy = 0xca,
-    ApsLastChannelFailureRate = 0xcb,
-    ApsChannelTimer = 0xcc,
-    ApsMaxWindowSize = 0xcd,
-    ApsParentAnnounceTimer = 0xce,
-}
-
 /// 2.2.4.4.1 - APSME-GET.request
 pub struct ApsmeGetRequest {
     attribute: AIBAttribute,
 }
 
-pub struct AIBAttributeValue {}
+
 /// 2.2.4.4.2 - APSME-GET.confirm
 pub struct ApsmeGetConfirm {
     pub(crate) status: ApsmeGetConfirmStatus,
-    pub(crate) attribute: AIBAttribute,
+    pub(crate) attribute: u8,
     pub(crate) attribute_length: u8,
-    pub(crate) attribute_value: AIBAttributeValue,
+    pub(crate) attribute_value: Option<AIBAttributeValue>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -105,12 +88,18 @@ pub struct ApsmeSetRequest {
     attribute_value: AIBAttributeValue,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum ApsmeSetConfirmStatus {
+    Success,
+    InvalidParameter,
+    UnsupportedAttribute
+}
+
+
 /// 2.2.4.4.4 - APSME-SET.confirm
 pub struct ApsmeSetConfirm {
-    status: u8,
-    attribute: AIBAttribute,
-    attribute_length: u8,
-    attribute_value: AIBAttributeValue,
+    pub(crate) status: ApsmeSetConfirmStatus,
+    pub(crate) identifier: u8,
 }
 
 /// 2.2.4.5.1 - APSME-ADD-GROUP.request
