@@ -14,7 +14,7 @@ pub enum DstAddrMode {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Address {
-    Nono,
+    None,
     Group(u16),
     Network(u16),
     Extended(u64),

@@ -1,28 +1,26 @@
-use heapless::Vec;
+use heapless::{LinearMap, Vec};
 
 
 /// 2.2.7.2 - AIB (APS Information Base Attributes)
+#[derive(Default)]
 pub struct ApsInformationBase {
-    attributes: Vec<AIBAttribute, 265>
+    attributes: LinearMap<u8, AIBAttribute, 265>
 }
 
 impl ApsInformationBase {
     pub fn new() -> Self {
         Self {
-            attributes: Vec::new()
+            attributes: LinearMap::new()
         }
     }
     pub fn get_attribute(&self, id: u8) -> Option<&AIBAttribute> {
-        self.attributes.iter().find(|attr| attr.id() == id)
+        self.attributes.get(&id)
     }
-    pub fn write_attribute_value(&self, _id: u8, _value: AIBAttributeValue) -> Result<(), &'static str> {
-        Ok(())
-    }
-}
 
-impl Default for ApsInformationBase {
-    fn default() -> Self {
-        Self::new()
+    pub fn write_attribute_value(&mut self, id: u8, value: AIBAttribute) -> Result<(), &'static str> {
+        // self.attributes.insert(id, value).map_err(|_| "could not insert");
+
+        Ok(())
     }
 }
 
@@ -33,7 +31,7 @@ pub type AIBAttributeValue = [u8; 8];
 pub enum AIBAttribute {
     ApsBindingTable,
     ApsDesignatedCoordinator(bool),
-    ApsChannelMaskList(u8),
+    ApsChannelMaskList(Vec<u8, 265>),
     ApsUseExtendedPANID(u64),
     ApsGroupTable(u8),
     ApsNonmemberRadius(u8),

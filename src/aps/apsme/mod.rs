@@ -10,9 +10,10 @@
 //!
 #![allow(dead_code)]
 
+use core::ops::Not;
+
 use basemgt::{ApsmeAddGroupConfirm, ApsmeAddGroupRequest, ApsmeBindConfirm, ApsmeBindRequest, ApsmeBindRequestStatus, ApsmeGetConfirm, ApsmeGetConfirmStatus, ApsmeRemoveAllGroupsConfirm, ApsmeRemoveAllGroupsRequest, ApsmeRemoveGroupConfirm, ApsmeRemoveGroupRequest, ApsmeSetConfirm, ApsmeUnbindConfirm, ApsmeUnbindRequest, ApsmeUnbindRequestStatus};
-use heapless::Vec;
-use super::{aib::{AIBAttribute, ApsInformationBase}, types::Address};
+use super::{aib::{AIBAttribute, ApsInformationBase}, binding::ApsBindingTable,  types::Address};
 
 pub mod basemgt;
 pub mod groupmgt;
@@ -30,7 +31,7 @@ pub trait ApsmeSap {
     /// 2.2.4.4.1 - APSME-GET.request
     fn get(&self, attribute: u8) -> ApsmeGetConfirm;
     /// 2.2.4.4.3 - APSME-SET.request
-    fn set(&self, attribute: AIBAttribute) -> ApsmeSetConfirm;
+    fn set(&mut self, attribute: AIBAttribute) -> ApsmeSetConfirm;
     /// 2.2.4.5.1 - APSME-ADD-GROUP.request
     fn add_group(&self, request: ApsmeAddGroupRequest) -> ApsmeAddGroupConfirm;
     /// 2.2.4.5.3 - APSME-REMOVE-GROUP.request
@@ -41,20 +42,18 @@ pub trait ApsmeSap {
 
 struct Apsme {
     pub(crate) supports_binding_table: bool,
-    // 2.2.8.1 Binding Table Implementation
-    // TODO: limit the size
-    pub(crate) binding_table: Vec<Address, 265>,
+    pub(crate) binding_table: ApsBindingTable,
     pub(crate) joined_network: Option<Address>,
-    pub(crate) database: ApsInformationBase,
+    pub(crate) aib: ApsInformationBase,
 }
 
 impl  Apsme {
     fn new() -> Apsme {
         Self {
             supports_binding_table: true,
-            binding_table: Vec::new(),
+            binding_table: ApsBindingTable::new(),
             joined_network: None,
-            database: ApsInformationBase::new(),
+            aib: ApsInformationBase::new(),
         }
     }
     fn is_joined(&self) -> bool {
@@ -62,29 +61,30 @@ impl  Apsme {
     }
 
     // 2.2.8.2.2 Binding
-    fn add_binding(&mut self, address: Address) -> Result<(), &'static str> {
-        self.binding_table.push(address).map_err(|_| "Binding table is full")
-    }
-    fn remove_binding(&mut self, address: Address) -> Result<(), &'static str> {
-        self.binding_table.retain(|addr| addr != &address);
+    // fn add_binding(&mut self, address: Address) -> Result<(), &'static str> {
+        // self.binding_table.create_binding_link(address.)
+        // Ok(())
+    // }
+    // fn remove_binding(&mut self, address: Address) -> Result<(), &'static str> {
+        // self.binding_table.retain(|addr| addr != &address);
 
-        Ok(())
-    }
-    fn is_binding_table_full(&self) -> bool {
-        self.binding_table.len() >= self.binding_table.capacity()
-    }
+        // Ok(())
+    // }
 }
 
 impl ApsmeSap for Apsme {
-    /// 2.2.4.3.1 - request to bind two devices together, or to bind a device to a group
+    /// 2.2.4.3.1 - APSME-BIND.request
+    /// request to bind two devices together, or to bind a device to a group
     fn bind_request(&mut self, request: ApsmeBindRequest) -> ApsmeBindConfirm {
         let status = if !self.is_joined() || !self.supports_binding_table {
             ApsmeBindRequestStatus::IllegalRequest
-        } else if self.is_binding_table_full() {
+        } else if self.binding_table.is_full() {
             ApsmeBindRequestStatus::TableFull
         } else {
-            self.add_binding(request.src_address.clone()).expect("Could not add entry in binding table");
-            ApsmeBindRequestStatus::Success
+            match self.binding_table.create_binding_link(&request) {
+                Ok(_) => ApsmeBindRequestStatus::Success,
+                Err(_) => ApsmeBindRequestStatus::IllegalRequest,
+            }
         };
 
         ApsmeBindConfirm {
@@ -100,13 +100,20 @@ impl ApsmeSap for Apsme {
 
     /// 2.2.4.3.3 - request to unbind two devices, or to unbind a device from a group
     fn unbind_request(&mut self, request: ApsmeUnbindRequest) -> ApsmeUnbindConfirm {
-        let status = if !self.is_joined() || !self.supports_binding_table {
-            ApsmeUnbindRequestStatus::IllegalRequest
-        } else if !self.binding_table.contains(&request.src_address) {
-            ApsmeUnbindRequestStatus::InvalidBinding
+        let status = if self.is_joined().not() {
+            ApsmeUnbindRequestStatus::IllegalRequest            
         } else {
-            ApsmeUnbindRequestStatus::Success
-
+            let res = self.binding_table.remove_binding_link(&request);
+            match res {
+                Ok(_) => ApsmeUnbindRequestStatus::Success,
+                Err(err) => {
+                    match err {
+                        crate::aps::binding::BindingError::IllegalRequest => ApsmeUnbindRequestStatus::IllegalRequest,
+                        crate::aps::binding::BindingError::InvalidBinding => ApsmeUnbindRequestStatus::InvalidBinding,
+                        _ => ApsmeUnbindRequestStatus::IllegalRequest, 
+                    } 
+                }
+            }
         };
 
         ApsmeUnbindConfirm {
@@ -122,7 +129,7 @@ impl ApsmeSap for Apsme {
 
     // 2.2.4.4.1 APSME-GET.request
     fn get(&self, identifier: u8) -> ApsmeGetConfirm {
-        let attr = self.database.get_attribute(identifier);
+        let attr = self.aib.get_attribute(identifier);
         return match attr {
             Some(attr) => ApsmeGetConfirm {
                 status: ApsmeGetConfirmStatus::Success,
@@ -140,11 +147,12 @@ impl ApsmeSap for Apsme {
     }
 
     // 2.2.4.4.3 APSME-SET.request
-    fn set(&self, attribute: AIBAttribute) -> ApsmeSetConfirm {
-        match self.database.write_attribute_value(attribute.id(), attribute.value()) {
+    fn set(&mut self, attribute: AIBAttribute) -> ApsmeSetConfirm {
+        let id = attribute.id().clone();
+        match self.aib.write_attribute_value(id.clone(), attribute) {
             Ok(_) => ApsmeSetConfirm {
                 status: basemgt::ApsmeSetConfirmStatus::Success,
-                identifier: attribute.id(),
+                identifier: id.clone(),
             },
             Err(_) => todo!()
         }

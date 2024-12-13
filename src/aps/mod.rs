@@ -7,5 +7,7 @@ pub mod apsde;
 /// The APS management entity provides a variety of services to application objects including security services and binding of devices.
 /// It also maintains a database of managed objects, known as the APS information base (AIB).
 pub mod apsme;
-pub mod aib;
+mod aib;
+mod binding;
+
 
