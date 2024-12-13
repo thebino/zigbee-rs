@@ -7,7 +7,10 @@ use heapless::Vec;
 
 use crate::{impl_pack_bytes, parse::PackBytes};
 
-const PAYLOAD_CAP: usize = 128;
+/// 3.5.1.
+const PROTOCOL_VERSION: u8 = 0x02;
+
+const PAYLOAD_SIZE: usize = 128;
 
 impl_pack_bytes! {
     pub struct ShortAddress(u16);
@@ -29,13 +32,109 @@ impl Debug for IeeeAddress {
     }
 }
 
+#[derive(Debug)]
+pub enum NwkFrame {
+    Data(NwkDataFrame),
+    NwkCommand(NwkCommandFrame),
+    Reserved(NwkHeader),
+    InterPan(NwkHeader),
+}
+
+impl NwkFrame {
+    pub fn frame_type_identifier(&self) -> FrameTypeIdentifier {
+        match self {
+            Self::Data(nwk_data_frame) => {
+                nwk_data_frame.header.frame_control.frame_type_identifier()
+            }
+            Self::NwkCommand(nwk_command_frame) => nwk_command_frame
+                .header
+                .frame_control
+                .frame_type_identifier(),
+            Self::Reserved(nwk_header) => nwk_header.frame_control.frame_type_identifier(),
+            Self::InterPan(nwk_header) => nwk_header.frame_control.frame_type_identifier(),
+        }
+    }
+}
+
+impl PackBytes for NwkFrame {
+    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
+        let mut src = src.into_iter();
+        let header = NwkHeader::unpack_from_iter(&mut src)?;
+        let frame = match header.frame_control.frame_type_identifier() {
+            FrameTypeIdentifier::Data => Self::Data(NwkDataFrame {
+                header,
+                payload: PackBytes::unpack_from_iter(&mut src)?,
+            }),
+            FrameTypeIdentifier::NwkCommand => Self::NwkCommand(NwkCommandFrame {
+                header,
+                command_identifier: PackBytes::unpack_from_iter(&mut src)?,
+                payload: PackBytes::unpack_from_iter(&mut src)?,
+            }),
+            FrameTypeIdentifier::Reserved => Self::Reserved(header),
+            FrameTypeIdentifier::InterPan => Self::InterPan(header),
+        };
+        Some(frame)
+    }
+}
+
 impl_pack_bytes! {
     #[derive(Debug)]
-    pub struct NwkFrame {
+    pub struct NwkDataFrame {
         #[transparent(NwkHeader)]
         pub header: NwkHeader,
-        #[collect(Vec<u8, PAYLOAD_CAP>)]
-        pub payload: Vec<u8, PAYLOAD_CAP>,
+        #[collect(Vec<u8, PAYLOAD_SIZE>)]
+        pub payload: Vec<u8, PAYLOAD_SIZE>,
+    }
+}
+
+impl_pack_bytes! {
+    /// NWK Command Frame.
+    ///
+    /// See Section 3.3.2.2.
+    #[derive(Debug)]
+    pub struct NwkCommandFrame {
+        #[transparent(NwkHeader)]
+        pub header: NwkHeader,
+        #[transparent(CommandFrameIdentifier)]
+        pub command_identifier: CommandFrameIdentifier,
+        #[collect(Vec<u8, PAYLOAD_SIZE>)]
+        pub payload: Vec<u8, PAYLOAD_SIZE>,
+    }
+}
+
+/// Comand Frame Identifiers.
+///
+/// See Section 3.4.
+//#[repr(u8)]
+#[derive(Debug, PartialEq, Eq)]
+pub struct CommandFrameIdentifier(u8);
+//pub enum CommandFrameIdentifier {
+//    RouteRequest = 0x01,
+//    RouteReply = 0x02,
+//    NetworkStatus = 0x03,
+//    Leave = 0x04,
+//    RouteRecord = 0x05,
+//    RejoinRequest = 0x06,
+//    RejoinResponse = 0x07,
+//    LinkStatus = 0x08,
+//    NetworkReport = 0x09,
+//    NetworkUpdate = 0x0a,
+//    EndDeviceTimeoutRequest = 0x0b,
+//    EndDeviceTimeoutResponse = 0x0c,
+//    LinkPowerDelta = 0x0d,
+//    Reserved,
+//}
+
+impl PackBytes for CommandFrameIdentifier {
+    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
+        let b = src.into_iter().next()?;
+        Some(Self(b))
+        //if b <= 0x0d {
+        //    // SAFETY: any byte with value <= 0x0d is a valid CommandFrameIdentifier
+        //    Some(unsafe { mem::transmute::<u8, Self>(b) })
+        //} else {
+        //    Some(Self::Reserved)
+        //}
     }
 }
 
@@ -103,7 +202,7 @@ impl_pack_bytes! {
 impl Debug for FrameControl {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("FrameControl")
-            .field("frame_type", &self.frame_type())
+            .field("frame_type", &self.frame_type_identifier())
             .field("protocol_version", &self.protocol_version())
             .field("discover_route", &self.discover_route())
             .field("multicast_flag", &self.multicast_flag())
@@ -117,7 +216,7 @@ impl Debug for FrameControl {
 }
 
 impl FrameControl {
-    pub fn frame_type(&self) -> FrameType {
+    pub fn frame_type_identifier(&self) -> FrameTypeIdentifier {
         // SAFETY: any 2 bit permutation is a valid FrameType
         unsafe { mem::transmute(((self.0 >> 14) & 0b11) as u8) }
     }
@@ -176,12 +275,38 @@ impl FrameControl {
     pub fn end_device_initiator(&self) -> bool {
         ((self.0 >> 2) & 0b1) != 0
     }
+
+    /// See Table 3-45.
+    pub fn transmission_method(&self) -> DataTransmissionMethod {
+        match (
+            self.discover_route(),
+            self.multicast_flag(),
+            self.destination_ieee_flag(),
+        ) {
+            (DiscoverRoute::Suppress, false, false) => DataTransmissionMethod::Broadcast,
+            (DiscoverRoute::Suppress, true, false) => DataTransmissionMethod::Multicast,
+            (DiscoverRoute::Suppress | DiscoverRoute::Enable, false, _) => {
+                DataTransmissionMethod::Unicast
+            }
+            //(DiscoverRoute::Suppress, false, _) => DataTransmissionMethod::SourceRouted,
+            (_, _, _) => unreachable!(),
+        }
+    }
+}
+
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DataTransmissionMethod {
+    Unicast,
+    Broadcast,
+    Multicast,
+    SourceRouted,
 }
 
 /// 3.3.1.1.1 Frame Type Sub-Field
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum FrameType {
+pub enum FrameTypeIdentifier {
     Data = 0b00,
     NwkCommand = 0b01,
     Reserved = 0b10,
@@ -251,7 +376,7 @@ pub enum MulticastMode {
     Reserved,
 }
 
-const RELAY_LIST_CAP: usize = 16;
+const RELAY_LIST_SIZE: usize = 16;
 
 impl_pack_bytes! {
     #[derive(Debug)]
@@ -270,8 +395,8 @@ impl_pack_bytes! {
         /// List of relay addresses from closest to the destination to closest to the originator.
         ///
         /// See Section 3.3.1.9.2.
-        #[collect(Vec<u8, RELAY_LIST_CAP>)]
-        pub relay_list: Vec<u8, RELAY_LIST_CAP>,
+        #[collect(Vec<u8, RELAY_LIST_SIZE>)]
+        pub relay_list: Vec<u8, RELAY_LIST_SIZE>,
     }
 }
 
@@ -299,21 +424,15 @@ mod tests {
         assert_eq!(got.relay_list, &[0xff, 0xff, 0xff, 0xff]);
     }
 
-    //#[test]
-    //fn unpack() {
-    //    let src = [1, 2, 3, 4, 5, 6, 7, 8];
-    //    let mut src = src.into_iter();
-    //    let s = src.by_ref();
-    //    s.take(2).collect::<Vec<&i32, 2>>();
-    //    assert!(false, "{:?}", s.collect::<Vec<&i32, 10>>())
-    //}
-
     #[test]
     fn unpack_frame_control() {
         let raw = [0b00111101u8, 0b01010100u8];
 
         let frame_control = FrameControl::unpack_from_slice(&raw).unwrap();
-        assert_eq!(frame_control.frame_type(), FrameType::Data);
+        assert_eq!(
+            frame_control.frame_type_identifier(),
+            FrameTypeIdentifier::Data
+        );
         assert_eq!(frame_control.protocol_version(), 0b1111u8);
         assert_eq!(frame_control.discover_route(), DiscoverRoute::Enable);
         assert!(!frame_control.multicast_flag());
@@ -325,6 +444,25 @@ mod tests {
     }
 
     #[test]
+    fn unpack_nwk_header() {
+        const CMD_FRAME: &str =
+            "4802c38100000fb7289f34660066719a2a004b120000fb73de19a49b56f6d37b6552";
+        // 4802c38100000f65285039660066719a2a004b1200001b66d4657627ea741f8ec9df
+        let raw = [
+            0x48, // frame control 0b01001000
+            0x02, // frame control 0b00000010
+            0xc3, // dest
+            0x81, // dest
+            0x00, // src
+            0x00, // src
+            0xfb, // radius
+            0x72, // seq number
+        ];
+
+        unimplemented!()
+    }
+
+    #[test]
     fn unpack_nwk_frame() {
         let mut raw = [0u8; EXAMPLE_PAYLOAD.len() / 2];
         hex::decode_to_slice(EXAMPLE_PAYLOAD, &mut raw).unwrap();
@@ -332,4 +470,13 @@ mod tests {
         let frame = NwkFrame::unpack_from_slice(&raw);
         assert!(false, "frame {:#?}", frame)
     }
+
+    //#[test]
+    //fn unpack_command_frame_identifier() {
+    //    let raw = [0b00000111u8];
+
+    //    let id = CommandFrameIdentifier::unpack_from_slice(&raw).unwrap();
+
+    //    assert_eq!(id, CommandFrameIdentifier::RejoinResponse)
+    //}
 }

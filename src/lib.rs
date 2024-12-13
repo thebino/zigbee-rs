@@ -7,3 +7,4 @@ mod spec;
 pub use spec::*;
 
 pub(crate) mod parse;
+pub use parse::PackBytes;

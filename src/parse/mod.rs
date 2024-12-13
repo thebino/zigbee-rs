@@ -1,3 +1,5 @@
+use core::iter::FromIterator;
+
 use heapless::Vec;
 
 pub trait PackBytes
@@ -39,6 +41,12 @@ impl_primitive!(u64, 8);
 impl_primitive!(i16, 2);
 impl_primitive!(i32, 4);
 impl_primitive!(i64, 8);
+
+impl<const N: usize> PackBytes for Vec<u8, N> {
+    fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
+        Some(FromIterator::from_iter(src))
+    }
+}
 
 #[macro_export]
 macro_rules! impl_pack_bytes {
