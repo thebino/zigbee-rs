@@ -1,13 +1,28 @@
 use heapless::FnvIndexSet;
+use strum::EnumCount;
 
 pub struct IeeeAddress(u64);
 
 pub type NwkAddress = u16;
 
+macro_rules! bitfield_bits {
+    () => {
+        heapless::FnvIndexSet::new()
+    };
+    ($ty: ty; $($x: expr),+ $(,)?) => {{
+        const CAPACITY: usize =<$ty>::COUNT.next_power_of_two();
+        let mut bits = heapless::FnvIndexSet::<$ty, CAPACITY>::new();
+        $(
+            let _ = bits.insert($x);
+        )+
+        bits
+    }};
+}
+
 pub struct MacCapabilityFlagsField(u8);
 
 #[repr(u8)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq, EnumCount)]
 pub enum MacCapability {
     /// The alternate PAN coordinator sub-field is one bit in length and shall be set to 1 if this node is capable of becoming a PAN coordinator.
     /// Otherwise, the alternative PAN coordinator sub-field shall be set to 0.
@@ -32,7 +47,7 @@ pub enum MacCapability {
 
 impl MacCapabilityFlagsField {
     // Note: Capacity of IndexSet must be a power of 2.
-    fn new(capabilities: FnvIndexSet<MacCapability, 8>) -> Self {
+    fn new(capabilities: FnvIndexSet<MacCapability, { MacCapability::COUNT.next_power_of_two() }>) -> Self {
         let mut value: u8 = 0;
         for capa in capabilities.iter() {
             value |= 1 << *capa as u8
@@ -49,7 +64,7 @@ impl MacCapabilityFlagsField {
 pub struct ServerMaskField(u16);
 
 #[repr(u8)]
-#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Eq, Hash, PartialEq, EnumCount)]
 pub enum ServerMaskBit {
     PrimaryTrustCenter = 0,
     BackupTrustCenter = 1,
@@ -62,7 +77,7 @@ pub enum ServerMaskBit {
 
 impl ServerMaskField {
     fn new(
-        server_mask_bits: FnvIndexSet<ServerMaskBit, 16>,
+        server_mask_bits: FnvIndexSet<ServerMaskBit, { ServerMaskBit::COUNT.next_power_of_two() }>,
         stack_compliance_revision: u8,
     ) -> Self {
         let mut value: u16 = 0;
@@ -94,9 +109,11 @@ mod tests {
         let expected: u8 = 0b1000_0001;
 
         // when
-        let mut capas = FnvIndexSet::<MacCapability, 8>::new();
-        let _ = capas.insert(MacCapability::AlternatePanCoordinator);
-        let _ = capas.insert(MacCapability::AllocateAddress);
+        let capas = bitfield_bits!(
+            MacCapability;
+            MacCapability::AlternatePanCoordinator,
+            MacCapability::AllocateAddress,
+        );
         let flagsfield = MacCapabilityFlagsField::new(capas);
 
         // then
@@ -106,9 +123,11 @@ mod tests {
     #[test]
     fn reading_mac_capabilites_should_succeed() {
         // given
-        let mut capas = FnvIndexSet::<MacCapability, 8>::new();
-        let _ = capas.insert(MacCapability::AlternatePanCoordinator);
-        let _ = capas.insert(MacCapability::AllocateAddress);
+        let capas = bitfield_bits!(
+            MacCapability;
+            MacCapability::AlternatePanCoordinator,
+            MacCapability::AllocateAddress,
+        );
 
         // when
         let flagsfield = MacCapabilityFlagsField::new(capas);
@@ -125,9 +144,11 @@ mod tests {
         let expected = 0b0010_1100_0100_0001;
 
         // when
-        let mut bits = FnvIndexSet::<ServerMaskBit, 16>::new();
-        let _ = bits.insert(ServerMaskBit::PrimaryTrustCenter);
-        let _ = bits.insert(ServerMaskBit::NetworkManager);
+        let bits = bitfield_bits!(
+            ServerMaskBit;
+            ServerMaskBit::PrimaryTrustCenter,
+            ServerMaskBit::NetworkManager,
+        );
         let server_mask_field = ServerMaskField::new(bits, 22);
 
         // then
@@ -137,9 +158,11 @@ mod tests {
     #[test]
     fn reading_server_mask_field_should_succeed() {
         // given
-        let mut bits = FnvIndexSet::<ServerMaskBit, 16>::new();
-        let _ = bits.insert(ServerMaskBit::PrimaryTrustCenter);
-        let _ = bits.insert(ServerMaskBit::NetworkManager);
+        let bits = bitfield_bits!(
+            ServerMaskBit;
+            ServerMaskBit::PrimaryTrustCenter,
+            ServerMaskBit::NetworkManager,
+        );
 
         // when
         let server_mask_field = ServerMaskField::new(bits, 22);

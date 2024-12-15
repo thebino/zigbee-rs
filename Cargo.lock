@@ -23,8 +23,69 @@ dependencies = [
 ]
 
 [[package]]
+name = "heck"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "proc-macro2"
+version = "1.0.92"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "unicode-ident 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "quote"
+version = "1.0.37"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "proc-macro2 1.0.92 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "rustversion"
+version = "1.0.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "stable_deref_trait"
 version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "strum"
+version = "0.26.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "strum_macros 0.26.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.26.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "heck 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "proc-macro2 1.0.92 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustversion 1.0.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "syn 2.0.90 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "syn"
+version = "2.0.90"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "proc-macro2 1.0.92 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quote 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)",
+ "unicode-ident 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "unicode-ident"
+version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -32,10 +93,19 @@ name = "zigbee"
 version = "0.1.0-alpha.1"
 dependencies = [
  "heapless 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "strum 0.26.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [metadata]
 "checksum byteorder 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 "checksum hash32 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "47d60b12902ba28e2730cd37e95b8c9223af2808df9e902d4df49588d1470606"
 "checksum heapless 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0bfb9eb618601c89945a70e254898da93b13be0388091d42117462b265bb3fad"
+"checksum heck 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+"checksum proc-macro2 1.0.92 (registry+https://github.com/rust-lang/crates.io-index)" = "37d3544b3f2748c54e147655edb5025752e2303145b5aefb3c3ea2c78b973bb0"
+"checksum quote 1.0.37 (registry+https://github.com/rust-lang/crates.io-index)" = "b5b9d34b8991d19d98081b46eacdd8eb58c6f2b201139f7c5f643cc155a633af"
+"checksum rustversion 1.0.18 (registry+https://github.com/rust-lang/crates.io-index)" = "0e819f2bc632f285be6d7cd36e25940d45b2391dd6d9b939e79de557f7014248"
 "checksum stable_deref_trait 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
+"checksum strum 0.26.3 (registry+https://github.com/rust-lang/crates.io-index)" = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
+"checksum strum_macros 0.26.4 (registry+https://github.com/rust-lang/crates.io-index)" = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+"checksum syn 2.0.90 (registry+https://github.com/rust-lang/crates.io-index)" = "919d3b74a5dd0ccd15aeb8f93e7006bd9e14c295087c9896a110f490752bcf31"
+"checksum unicode-ident 1.0.14 (registry+https://github.com/rust-lang/crates.io-index)" = "adb9e6ca4f869e1180728b7950e35922a7fc6397f7b641499e8f3ef06e50dc83"
