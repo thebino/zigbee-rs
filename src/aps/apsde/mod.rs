@@ -29,14 +29,34 @@ pub trait ApsdeSap {
 }
 
 struct Apsde {
-
+    pub(crate) supports_binding_table: bool,
 }
 
 impl ApsdeSap for Apsde {
     /// 2.2.4.1.1 - APSDE-DATA.request  
     fn data_request(&self, request: ApsdeSapRequest) -> ApsdeSapConfirm {
-        // if request.dst_addr_mode == DstAddrMode::None {}
-        todo!()
+        let status = if request.dst_addr_mode == DstAddrMode::None && self.supports_binding_table {
+            // TODO: search binding table with endpoint and cluster identifiers
+            // request.src_endpoint.value
+            // request.cluster_id
+            if false { // TODO if no binding table entries found
+                ApsdeSapConfirmStatus::NoBoundDevice
+            } else {
+                // TODO: fix
+                ApsdeSapConfirmStatus::Success
+            }
+        } else {
+            // TODO: fix
+            ApsdeSapConfirmStatus::NoAck
+        };
+        ApsdeSapConfirm { 
+            dst_addr_mode: request.dst_addr_mode, 
+            dst_address: request.dst_address, 
+            dst_endpoint: request.dst_endpoint, 
+            src_endpoint: request.src_endpoint,
+            status, 
+            tx_time: 0,
+        }
     }
 }
 
@@ -75,7 +95,7 @@ pub enum ApsdeSapConfirmStatus {
 // 2.2.4.1.2
 pub struct ApsdeSapConfirm {
     pub dst_addr_mode: DstAddrMode,
-    pub dst_address: u8,
+    pub dst_address: Address,
     pub dst_endpoint: u8,
     pub src_endpoint: types::SrcEndpoint,
     pub status: ApsdeSapConfirmStatus,

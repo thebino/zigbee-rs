@@ -23,9 +23,11 @@ pub(crate) struct NodeDescriptor {
 }
 
 /// 2.3.2.3.1 - Logical Type Field
+#[derive(Default)]
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LogicalType{
+    #[default]
     Coordinator = 0b000,
     Router = 0b001,
     EndDevice = 0b010,

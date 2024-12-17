@@ -5,6 +5,7 @@ pub enum SrcAddrMode {
     Extended = 0x02,
 }
 
+#[derive(PartialEq)]
 pub enum DstAddrMode {
     None = 0x00,
     Group = 0x01,

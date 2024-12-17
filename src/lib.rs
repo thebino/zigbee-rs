@@ -7,12 +7,14 @@
 //!
 //! **This is how it could look like in the future**
 //!
-//! ```rust,ignore
-//! let peripherals = esp_hal::init(esp_hal::Config::default());
-//! let mut ieee802154 = Ieee802154::new(peripherals.IEEE802154, peripherals.RADIO_CLK);
+//! ```rust
+//! let zigbee_device = zigbee::ZigbeeDevice::new();
+//! let config = zigbee::Config { radio_channel: 11 };
+//! let _ = zigbee_device.configure(config);
 //!
-//! let zigbee_device = zigbee::zdo::ZigbeeDevice::new(ieee802154);
-//! let available_networks: Vec<ZigbeeNetwork> = zigbee_device.scanning_networks();
+//! let temperature_sensor = zigbee;
+//! let _ = zigbee_device.register(temperature_sensor);
+//! let available_networks: Vec<zigbee::ZigBeeNetwork> = zigbee_device.scanning_networks();
 //! let parent_device = available_networks[0].device[0];
 //! let response = parent_device.request_to_join();
 //! ```
@@ -33,6 +35,12 @@ pub mod aps;
 /// 2.3 Application framework
 pub mod apl;
 
+
+mod zdo;
+pub use zdo::ZigbeeDevice;
+pub use zdo::config::Config;
+pub use zdo::ZigBeeNetwork;
+pub use apl::descriptors::LogicalType;
+
 mod common;
  
-
