@@ -4,5 +4,6 @@
 //!
 #![no_std]
 
+pub mod zaf;
 pub mod zdp;
 pub mod common;

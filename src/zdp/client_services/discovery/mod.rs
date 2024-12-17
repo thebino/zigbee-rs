@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
-use crate::common::types::{IeeeAddress, MacCapabilityFlagsField, NwkAddress, ServerMaskField};
+use crate::common::types::{IeeeAddress, NwkAddress};
+use crate::zaf::descriptors::node_descriptor::{MacCapabilities, NodeDescriptor, ServerMask};
 
 use heapless::Vec;
 
@@ -104,7 +105,7 @@ pub struct DeviceAnnce {
     /// IEEE address for the Local Device
     ieee_addr: IeeeAddress,
     /// Capability of the local device
-    capability: MacCapabilityFlagsField,
+    capability: MacCapabilities,
 }
 
 // 2.4.3.1.11 Parent_annce
@@ -129,7 +130,7 @@ pub struct UserDescSet {
 
 // 2.4.3.1.14 System_Server_Discovery_req
 pub struct SystemServerDiscoveryReq {
-    server_mask: ServerMaskField,
+    server_mask: ServerMask,
 }
 
 // 2.4.3.1.15 Discovery_store_req
@@ -149,4 +150,14 @@ pub struct DiscoveryStoreReq {
     /// List of bytes of simple_desc_count length, each of which represents the size in bytes of the Simple Descriptor
     /// for each Active Endpoint on the Local Device.
     simple_desc_size_list: Vec<u8, 255>,
+}
+
+// 2.4.3.1.16 Node_Desc_store_req
+pub struct NodeDescStoreReq {
+    /// NWK Address for the Local Device
+    nwk_addr: NwkAddress,
+    /// IEEE Address for the Local Device.
+    ieee_addr: IeeeAddress,
+    // Node Descriptor
+    node_descriptor: NodeDescriptor,
 }
