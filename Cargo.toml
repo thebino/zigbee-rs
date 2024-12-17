@@ -16,4 +16,5 @@ license = "MIT OR Apache-2.0"
 [features]
 
 [dependencies]
-
+heapless = "0.8.0"
+strum = { version = "0.26.3", features = ["derive"] }
