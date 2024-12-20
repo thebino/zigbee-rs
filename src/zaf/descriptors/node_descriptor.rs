@@ -116,8 +116,8 @@ impl NodeDescriptor {
 
 // 2.3.2.3.1 Logical Type Field
 // The logical type field of the node descriptor is three bits in length and specifies the device type of the ZigBee node.
-#[derive(Default)]
 #[repr(u8)]
+#[derive(Debug, Default, PartialEq)]
 pub enum LogicalType {
     #[default]
     ZigBeeCoordinator = 0b000,
@@ -444,6 +444,95 @@ mod tests {
         assert!(descriptor_capabilities
             .is_set(DescriptorCapabilityFlag::ExtendedActiveEndpontListAvailable));
         assert!(descriptor_capabilities
+            .is_set(DescriptorCapabilityFlag::ExtendedSimpleDescriptorListAvailable));
+    }
+
+    #[test]
+    fn creating_node_descriptor_should_succeed() {
+        // given
+        let logical_type = LogicalType::ZigBeeRouter;
+        let complex_descriptor_available = true;
+        let user_descriptor_available = true;
+        let frequency_band_flags = bitfield_bits!(
+            FrequencyBandFlag;
+            FrequencyBandFlag::High,
+        );
+        let frequency_bands = FrequencyBands::new(frequency_band_flags);
+        let mac_capability_flags = bitfield_bits!(
+            MacCapabilityFlag;
+            MacCapabilityFlag::AllocateAddress,
+            MacCapabilityFlag::SecurityCapability,
+        );
+        let mac_capabilities = MacCapabilities::new(mac_capability_flags);
+        let manufacturer_code = 42;
+        let maximum_buffer_size = 8;
+        let maximum_incoming_transfer_size = 500;
+        let server_mask_flags = bitfield_bits!(
+            ServerMaskFlag;
+            ServerMaskFlag::PrimaryTrustCenter,
+            ServerMaskFlag::BackupBindingTableCache,
+        );
+        let stack_compliance_revision = 14;
+        let server_mask = ServerMask::new(server_mask_flags, stack_compliance_revision);
+        let maximum_outgoing_transfer_size = 1000;
+        let descriptor_capability_flags = bitfield_bits!(
+            DescriptorCapabilityFlag;
+            DescriptorCapabilityFlag::ExtendedActiveEndpontListAvailable,
+        );
+        let descriptor_capabilities = DescriptorCapabilities::new(descriptor_capability_flags);
+
+        // when
+        let node_descriptor = NodeDescriptor::new(
+            logical_type,
+            complex_descriptor_available,
+            user_descriptor_available,
+            frequency_bands,
+            mac_capabilities,
+            manufacturer_code,
+            maximum_buffer_size,
+            maximum_incoming_transfer_size,
+            server_mask,
+            maximum_outgoing_transfer_size,
+            descriptor_capabilities,
+        );
+
+        // then
+        assert_eq!(node_descriptor.logical_type(), LogicalType::ZigBeeRouter);
+        assert!(node_descriptor.complex_descriptor_available());
+        assert!(node_descriptor.user_descriptor_available());
+        assert!(node_descriptor
+            .frequency_bands()
+            .is_set(FrequencyBandFlag::High));
+        assert!(!node_descriptor
+            .frequency_bands()
+            .is_set(FrequencyBandFlag::EuropeanFSK));
+        assert!(node_descriptor
+            .mac_capabilities()
+            .is_set(MacCapabilityFlag::AllocateAddress));
+        assert!(node_descriptor
+            .mac_capabilities()
+            .is_set(MacCapabilityFlag::SecurityCapability));
+        assert!(!node_descriptor
+            .mac_capabilities()
+            .is_set(MacCapabilityFlag::PowerSource));
+        assert_eq!(node_descriptor.manufacturer_code(), 42);
+        assert_eq!(node_descriptor.maximum_buffer_size(), 8);
+        assert_eq!(node_descriptor.maximum_incoming_transfer_size(), 500);
+        assert!(node_descriptor
+            .server_mask()
+            .is_set(ServerMaskFlag::PrimaryTrustCenter));
+        assert!(node_descriptor
+            .server_mask()
+            .is_set(ServerMaskFlag::BackupBindingTableCache));
+        assert!(!node_descriptor
+            .server_mask()
+            .is_set(ServerMaskFlag::NetworkManager));
+        assert_eq!(node_descriptor.maximum_outgoing_transfer_size(), 1000);
+        assert!(node_descriptor
+            .descriptor_capabilities()
+            .is_set(DescriptorCapabilityFlag::ExtendedActiveEndpontListAvailable));
+        assert!(!node_descriptor
+            .descriptor_capabilities()
             .is_set(DescriptorCapabilityFlag::ExtendedSimpleDescriptorListAvailable));
     }
 }
