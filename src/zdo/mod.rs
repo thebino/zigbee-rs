@@ -19,9 +19,21 @@ impl ZigbeeDevice {
             config: Config::default(),
         }
     }
-    pub fn configure(&self, _config: Config) {
+
+    pub fn configure(&self, config: Config) {
 
     }
+
+    /// Indicates if the device is connected to a zigbee network
+    pub fn is_connected(&self) -> bool {
+        false // TODO: check connection state
+    }
+    pub fn try_to_connect(&self) {}
+
+    pub fn send_keep_alive(&self) {}
+
+    pub fn send_data(&self, _input: &[u8]) {}
+
 
     /// 2.1.3.1 - Device Discovery
     /// is the process whereby a ZigBee device can discover other ZigBee devices.

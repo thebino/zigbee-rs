@@ -8,9 +8,7 @@
 //! **This is how it could look like in the future**
 //!
 //! ```rust
-//! let zigbee_device = zigbee::ZigbeeDevice::new();
-//! let config = zigbee::Config { radio_channel: 11 };
-//! let _ = zigbee_device.configure(config);
+//! let zigbee_device = zigbee::init(zigbee::Config { radio_channel: 11, ..Default::default() });
 //!
 //! let temperature_sensor = zigbee;
 //! let _ = zigbee_device.register(temperature_sensor);
@@ -35,12 +33,23 @@ pub mod aps;
 /// 2.3 Application framework
 pub mod apl;
 
-
 mod zdo;
-pub use zdo::ZigbeeDevice;
 pub use zdo::config::Config;
-pub use zdo::ZigBeeNetwork;
+pub use zdo::config::DiscoveryType;
 pub use apl::descriptors::LogicalType;
+pub use zdo::ZigbeeDevice;
+pub use zdo::ZigBeeNetwork;
+
 
 mod common;
- 
+
+/// Initialize a new zigbee device with the default configuartion.
+///
+/// Initialize a new zigbee device with a configuration
+pub fn init(config: zdo::config::Config) -> ZigbeeDevice {
+    let device = ZigbeeDevice::default();
+    device.configure(config);
+
+    device
+}
+
