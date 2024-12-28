@@ -43,6 +43,8 @@ pub use zdo::ZigBeeNetwork;
 
 mod common;
 
+mod nwk;
+
 /// Initialize a new zigbee device with the default configuartion.
 ///
 /// Initialize a new zigbee device with a configuration

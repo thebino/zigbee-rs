@@ -13,6 +13,8 @@
 use core::ops::Not;
 
 use basemgt::{ApsmeAddGroupConfirm, ApsmeAddGroupRequest, ApsmeBindConfirm, ApsmeBindRequest, ApsmeBindRequestStatus, ApsmeGetConfirm, ApsmeGetConfirmStatus, ApsmeRemoveAllGroupsConfirm, ApsmeRemoveAllGroupsRequest, ApsmeRemoveGroupConfirm, ApsmeRemoveGroupRequest, ApsmeSetConfirm, ApsmeUnbindConfirm, ApsmeUnbindRequest, ApsmeUnbindRequestStatus};
+use crate::nwk::nlme::{management::{NlmeJoinRequest, NlmeJoinStatus, NlmeNetworkDiscoveryRequest}, Nlme, NlmeSap};
+
 use super::{aib::{AIBAttribute, ApsInformationBase}, binding::ApsBindingTable,  types::Address};
 
 pub mod basemgt;
@@ -40,24 +42,58 @@ pub trait ApsmeSap {
     fn remove_all_groups(&self, request: ApsmeRemoveAllGroupsRequest) -> ApsmeRemoveAllGroupsConfirm;
 }
 
-struct Apsme {
+pub(crate) struct Apsme {
     pub(crate) supports_binding_table: bool,
     pub(crate) binding_table: ApsBindingTable,
     pub(crate) joined_network: Option<Address>,
     pub(crate) aib: ApsInformationBase,
+    pub(crate) nwk: Nlme,
 }
 
-impl  Apsme {
-    fn new() -> Apsme {
+impl Apsme {
+    pub(crate) fn new() -> Apsme {
         Self {
             supports_binding_table: true,
             binding_table: ApsBindingTable::new(),
             joined_network: None,
             aib: ApsInformationBase::new(),
+            nwk: Nlme::new(),
         }
     }
     fn is_joined(&self) -> bool {
         self.joined_network.is_some()
+    }
+
+    pub(crate) fn start_network_discovery(&self) {
+        let request = NlmeNetworkDiscoveryRequest {
+            scan_channels_list_structure: [0,0,0,0,0,0,0,0],
+            scan_duration: 10u8,
+        }; 
+        let confirm = self.nwk.network_discovery(request);
+
+        match confirm.status {
+            crate::nwk::nlme::management::NlmeNetworkDiscoveryStatus::Successful => {
+                // TODO: return list of available networks 
+            },
+        }
+    }
+
+    pub(crate) fn join_network(&self) {
+        let request = NlmeJoinRequest {
+            extended_pan_id: 0x00158D0001ABCD12,
+            rejoin_network: 0u8,
+            scan_duration: 10u8,
+            security_enabled: false,
+        };
+        let confirm = self.nwk.join(request);
+        match confirm.status {
+            NlmeJoinStatus::Success => {
+                // confirm.extended_pan_id 
+            },
+            _ => {
+                // TODO: handle errors
+            }
+        }
     }
 
     // 2.2.8.2.2 Binding

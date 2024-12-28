@@ -1,9 +1,11 @@
 use config::Config;
 
 pub mod config;
+use crate::aps::apsme::Apsme;
 
 pub struct ZigbeeDevice {
     config: Config,
+    apsme: Apsme,
 } 
 
 
@@ -17,6 +19,7 @@ impl ZigbeeDevice {
     pub fn new() -> Self {
         Self {
             config: Config::default(),
+            apsme: Apsme::new(),
         }
     }
 
@@ -28,7 +31,22 @@ impl ZigbeeDevice {
     pub fn is_connected(&self) -> bool {
         false // TODO: check connection state
     }
-    pub fn try_to_connect(&self) {}
+
+    pub fn scan_for_available_networks(&self) {
+        self.apsme.start_network_discovery()
+        // TODO: send beacon requests to actively scan for networks
+        // TODO: Beacon response (signal strenght - RSSI, network PAN ID, permit to join)
+    }
+
+    pub fn try_to_connect(&self) {
+        self.apsme.join_network()
+        // TODO: send Association request to choosen network coordinator or router
+        // TODO coordinator/router responds with an association confirmation
+    }
+
+    pub fn setup_security(&self) {
+        // TODO: exchange security keys (pre-configured trust center link keys)
+    }
 
     pub fn send_keep_alive(&self) {}
 
