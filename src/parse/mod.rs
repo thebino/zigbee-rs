@@ -29,7 +29,7 @@ macro_rules! impl_primitive {
         impl PackBytes for $ty {
             fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
                 let buf: Vec<u8, $sz> = src.into_iter().take($sz).collect();
-                Some(<$ty>::from_be_bytes(buf.into_array().unwrap()))
+                Some(<$ty>::from_le_bytes(buf.into_array().unwrap()))
             }
         }
     };

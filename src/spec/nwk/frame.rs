@@ -8,27 +8,30 @@ use heapless::Vec;
 use crate::{impl_pack_bytes, parse::PackBytes};
 
 /// 3.5.1.
+#[allow(dead_code)]
 const PROTOCOL_VERSION: u8 = 0x02;
 
 const PAYLOAD_SIZE: usize = 128;
 
 impl_pack_bytes! {
+    #[derive(Clone, Copy, PartialEq, Eq)]
     pub struct ShortAddress(u16);
 }
 
 impl Debug for ShortAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "ShortAddress({:#x})", self.0)
+        write!(f, "ShortAddress(0x{:04x})", self.0)
     }
 }
 
 impl_pack_bytes! {
+    #[derive(Clone, Copy, PartialEq, Eq)]
     pub struct IeeeAddress(u64);
 }
 
 impl Debug for IeeeAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "IeeeAddress({:#x})", self.0)
+        write!(f, "IeeeAddress(0x{:016x})", self.0)
     }
 }
 
@@ -107,34 +110,32 @@ impl_pack_bytes! {
 /// See Section 3.4.
 //#[repr(u8)]
 #[derive(Debug, PartialEq, Eq)]
-pub struct CommandFrameIdentifier(u8);
-//pub enum CommandFrameIdentifier {
-//    RouteRequest = 0x01,
-//    RouteReply = 0x02,
-//    NetworkStatus = 0x03,
-//    Leave = 0x04,
-//    RouteRecord = 0x05,
-//    RejoinRequest = 0x06,
-//    RejoinResponse = 0x07,
-//    LinkStatus = 0x08,
-//    NetworkReport = 0x09,
-//    NetworkUpdate = 0x0a,
-//    EndDeviceTimeoutRequest = 0x0b,
-//    EndDeviceTimeoutResponse = 0x0c,
-//    LinkPowerDelta = 0x0d,
-//    Reserved,
-//}
+pub enum CommandFrameIdentifier {
+    RouteRequest = 0x01,
+    RouteReply = 0x02,
+    NetworkStatus = 0x03,
+    Leave = 0x04,
+    RouteRecord = 0x05,
+    RejoinRequest = 0x06,
+    RejoinResponse = 0x07,
+    LinkStatus = 0x08,
+    NetworkReport = 0x09,
+    NetworkUpdate = 0x0a,
+    EndDeviceTimeoutRequest = 0x0b,
+    EndDeviceTimeoutResponse = 0x0c,
+    LinkPowerDelta = 0x0d,
+    Reserved,
+}
 
 impl PackBytes for CommandFrameIdentifier {
     fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
         let b = src.into_iter().next()?;
-        Some(Self(b))
-        //if b <= 0x0d {
-        //    // SAFETY: any byte with value <= 0x0d is a valid CommandFrameIdentifier
-        //    Some(unsafe { mem::transmute::<u8, Self>(b) })
-        //} else {
-        //    Some(Self::Reserved)
-        //}
+        if b <= 0x0d {
+            // SAFETY: any byte with value <= 0x0d is a valid CommandFrameIdentifier
+            Some(unsafe { mem::transmute::<u8, Self>(b) })
+        } else {
+            Some(Self::Reserved)
+        }
     }
 }
 
@@ -218,22 +219,22 @@ impl Debug for FrameControl {
 impl FrameControl {
     pub fn frame_type_identifier(&self) -> FrameTypeIdentifier {
         // SAFETY: any 2 bit permutation is a valid FrameType
-        unsafe { mem::transmute(((self.0 >> 14) & 0b11) as u8) }
+        unsafe { mem::transmute((self.0 & 0b11) as u8) }
     }
 
     /// See Section 3.3.1.1.2.
     pub fn protocol_version(&self) -> u8 {
-        ((self.0 >> 10) & 0b1111) as u8
+        ((self.0 >> 2) & 0b1111) as u8
     }
 
     /// See Section 3.3.1.1.3.
     pub fn discover_route(&self) -> DiscoverRoute {
-        DiscoverRoute::from_u8(((self.0 >> 8) & 0b11) as u8)
+        DiscoverRoute::from_u8(((self.0 >> 6) & 0b11) as u8)
     }
 
     /// See Section 3.3.1.1.4.
     pub fn multicast_flag(&self) -> bool {
-        ((self.0 >> 7) & 0b1) != 0
+        ((self.0 >> 8) & 0b1) != 0
     }
 
     /// The security sub-field shall have a value of 1 if, and only if, the
@@ -243,7 +244,7 @@ impl FrameControl {
     ///
     /// See Section 3.3.1.1.5.
     pub fn security_flag(&self) -> bool {
-        ((self.0 >> 6) & 0b1) != 0
+        ((self.0 >> 9) & 0b1) != 0
     }
 
     /// The source route sub-field shall have a value of 1 if and only if a source route subframe
@@ -252,7 +253,7 @@ impl FrameControl {
     ///
     /// See Section 3.3.1.1.6.
     pub fn source_flag(&self) -> bool {
-        ((self.0 >> 5) & 0b1) != 0
+        ((self.0 >> 10) & 0b1) != 0
     }
 
     /// The destination IEEE address sub-field shall have a value of 1 if, and only if, the NWK
@@ -260,7 +261,7 @@ impl FrameControl {
     ///
     /// See Section 3.3.1.1.7.
     pub fn destination_ieee_flag(&self) -> bool {
-        ((self.0 >> 4) & 0b1) != 0
+        ((self.0 >> 11) & 0b1) != 0
     }
 
     /// The source IEEE address sub-field shall have a value of 1 if, and only if, the NWK
@@ -268,12 +269,12 @@ impl FrameControl {
     ///
     /// See Section 3.3.1.1.8.
     pub fn source_ieee_flag(&self) -> bool {
-        ((self.0 >> 3) & 0b1) != 0
+        ((self.0 >> 12) & 0b1) != 0
     }
 
     /// See Section 3.3.1.1.9.
     pub fn end_device_initiator(&self) -> bool {
-        ((self.0 >> 2) & 0b1) != 0
+        ((self.0 >> 13) & 0b1) != 0
     }
 
     /// See Table 3-45.
@@ -402,10 +403,10 @@ impl_pack_bytes! {
 
 #[cfg(test)]
 mod tests {
-    const EXAMPLE_PAYLOAD: &str = "0912fcffda8601de8759f2feff142e842806a546008759f2feff142e840061d1e5ca8d4596ea43dac1724521898dc11684523abaf4db";
-    const EXAMPLE_PAYLOAD_2: &str = "0912fcffc38101208f119c775238c1a42871f815008f119c775238c1a400f02eb0f15490f73fd5976e454332249efae18cee9c";
-
     use super::*;
+
+    //const CMD_FRAME: &str =
+    //"0912fcff000008bf66719a2a004b120028e6ff3d001bc928c67f38c1a4008cf1882da4b1bbfcb9be";
 
     #[test]
     fn multicast_control_multicast_mode() {
@@ -426,7 +427,7 @@ mod tests {
 
     #[test]
     fn unpack_frame_control() {
-        let raw = [0b00111101u8, 0b01010100u8];
+        let raw = [0b01111100, 0b00101010u8];
 
         let frame_control = FrameControl::unpack_from_slice(&raw).unwrap();
         assert_eq!(
@@ -445,30 +446,19 @@ mod tests {
 
     #[test]
     fn unpack_nwk_header() {
-        const CMD_FRAME: &str =
-            "4802c38100000fb7289f34660066719a2a004b120000fb73de19a49b56f6d37b6552";
-        // 4802c38100000f65285039660066719a2a004b1200001b66d4657627ea741f8ec9df
         let raw = [
-            0x48, // frame control 0b01001000
-            0x02, // frame control 0b00000010
-            0xc3, // dest
-            0x81, // dest
-            0x00, // src
-            0x00, // src
-            0xfb, // radius
-            0x72, // seq number
+            0x09, 0x12, 0xfc, 0xff, 0x00, 0x00, 0x08, 0xbf, 0x66, 0x71, 0x9a, 0x2a, 0x00, 0x4b,
+            0x12, 0x00,
         ];
 
-        unimplemented!()
-    }
+        let header = NwkHeader::unpack_from_slice(&raw).unwrap();
 
-    #[test]
-    fn unpack_nwk_frame() {
-        let mut raw = [0u8; EXAMPLE_PAYLOAD.len() / 2];
-        hex::decode_to_slice(EXAMPLE_PAYLOAD, &mut raw).unwrap();
-
-        let frame = NwkFrame::unpack_from_slice(&raw);
-        assert!(false, "frame {:#?}", frame)
+        assert!(header.frame_control.security_flag());
+        assert!(header.frame_control.source_ieee_flag());
+        assert_eq!(header.destination, ShortAddress(0xfffc));
+        assert_eq!(header.source_ieee, Some(IeeeAddress(0x00124b002a9a7166)));
+        assert_eq!(header.radius, 8);
+        assert_eq!(header.sequence_number, 191);
     }
 
     //#[test]
