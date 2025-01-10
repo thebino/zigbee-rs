@@ -5,35 +5,17 @@ use core::{
 
 use heapless::Vec;
 
-use crate::{impl_pack_bytes, parse::PackBytes};
+use crate::{
+    address::{IeeeAddress, ShortAddress},
+    impl_pack_bytes,
+    parse::PackBytes,
+};
 
 /// 3.5.1.
 #[allow(dead_code)]
 const PROTOCOL_VERSION: u8 = 0x02;
 
 const PAYLOAD_SIZE: usize = 128;
-
-impl_pack_bytes! {
-    #[derive(Clone, Copy, PartialEq, Eq)]
-    pub struct ShortAddress(u16);
-}
-
-impl Debug for ShortAddress {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "ShortAddress(0x{:04x})", self.0)
-    }
-}
-
-impl_pack_bytes! {
-    #[derive(Clone, Copy, PartialEq, Eq)]
-    pub struct IeeeAddress(u64);
-}
-
-impl Debug for IeeeAddress {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "IeeeAddress(0x{:016x})", self.0)
-    }
-}
 
 #[derive(Debug)]
 pub enum NwkFrame {
@@ -197,7 +179,7 @@ impl PackBytes for NwkHeader {
 
 impl_pack_bytes! {
     /// 3.3.1.1 Frame Control Field
-    pub struct FrameControl(u16);
+    pub struct FrameControl(pub u16);
 }
 
 impl Debug for FrameControl {

@@ -52,14 +52,14 @@ impl<const N: usize> PackBytes for Vec<u8, N> {
 macro_rules! impl_pack_bytes {
     (
         $(#[$m:meta])*
-        $v:vis struct $name:ident($ty:ty);
+        $v:vis struct $name:ident($vt:vis $ty:ty);
     ) => {
         $(#[$m])*
-        $v struct $name($ty);
+        $v struct $name($vt $ty);
 
         impl $crate::parse::PackBytes for $name {
             fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-                Some(Self(PackBytes::unpack_from_iter(src)?))
+                Some(Self($crate::parse::PackBytes::unpack_from_iter(src)?))
             }
         }
     };
