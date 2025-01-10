@@ -1,4 +1,6 @@
-//! This set of primitives allows the next higher layer to manage group membership for endpoints on the current device by adding and removing entries in the group table
+//! This set of primitives allows the next higher layer to manage group
+//! membership for endpoints on the current device by adding and removing
+//! entries in the group table
 //!
 //! 2.2.4.5 Group Management
 type DstAddrMode = u8;

@@ -1,8 +1,30 @@
+use core::fmt;
+
 use heapless::FnvIndexSet;
 
-pub struct IeeeAddress(u64);
+use crate::impl_pack_bytes;
 
-pub type NwkAddress = u16;
+impl_pack_bytes! {
+    #[derive(Clone, Copy, PartialEq, Eq)]
+    pub struct ShortAddress(pub u16);
+}
+
+impl fmt::Debug for ShortAddress {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "ShortAddress(0x{:04x})", self.0)
+    }
+}
+
+impl_pack_bytes! {
+    #[derive(Clone, Copy, PartialEq, Eq)]
+    pub struct IeeeAddress(pub u64);
+}
+
+impl fmt::Debug for IeeeAddress {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "IeeeAddress(0x{:016x})", self.0)
+    }
+}
 
 pub struct MacCapabilityFlagsField(u8);
 
@@ -10,24 +32,32 @@ pub struct MacCapabilityFlagsField(u8);
 #[repr(u8)]
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub enum MacCapability {
-    /// The alternate PAN coordinator sub-field is one bit in length and shall be set to 1 if this node is capable of becoming a PAN coordinator.
+    /// The alternate PAN coordinator sub-field is one bit in length and shall
+    /// be set to 1 if this node is capable of becoming a PAN coordinator.
     /// Otherwise, the alternative PAN coordinator sub-field shall be set to 0.
     AlternatePanCoordinator = 0,
-    /// The device type sub-field is one bit in length and shall be set to 1 if this node is a full function device (FFD).
-    /// Otherwise, the device type sub-field shall be set to 0, indicating a reduced function device (RFD).
+    /// The device type sub-field is one bit in length and shall be set to 1 if
+    /// this node is a full function device (FFD). Otherwise, the device
+    /// type sub-field shall be set to 0, indicating a reduced function device
+    /// (RFD).
     DeviceType = 1,
-    /// The power source sub-field is one bit in length and shall be set to 1 if the current power source is mains power.
-    /// Otherwise, the power source sub-field shall be set to 0.
-    /// This information is derived from the node current power source field of the node power descriptor.
+    /// The power source sub-field is one bit in length and shall be set to 1 if
+    /// the current power source is mains power. Otherwise, the power source
+    /// sub-field shall be set to 0. This information is derived from the
+    /// node current power source field of the node power descriptor.
     PowerSource = 2,
-    /// The receiver on when idle sub-field is one bit in length and shall be set to 1 if the device does not disable its receiver to conserve power during idle periods.
-    /// Otherwise, the receiver on when idle sub-field shall be set to 0.
+    /// The receiver on when idle sub-field is one bit in length and shall be
+    /// set to 1 if the device does not disable its receiver to conserve power
+    /// during idle periods. Otherwise, the receiver on when idle sub-field
+    /// shall be set to 0.
     ReceiverOnWhenIdle = 3,
-    /// The security capability sub-field is one bit in length and shall be set to 1 if the device is capable of sending
-    /// and receiving frames secured using the security suite specified in [B1].
-    /// Otherwise, the security capability sub-field shall be set to 0.
+    /// The security capability sub-field is one bit in length and shall be set
+    /// to 1 if the device is capable of sending and receiving frames
+    /// secured using the security suite specified in [B1]. Otherwise, the
+    /// security capability sub-field shall be set to 0.
     SecurityCapability = 6,
-    /// The allocate address sub-field is one bit in length and shall be set to 0 or 1
+    /// The allocate address sub-field is one bit in length and shall be set to
+    /// 0 or 1
     AllocateAddress = 7,
 }
 

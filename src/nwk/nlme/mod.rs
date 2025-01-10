@@ -1,6 +1,7 @@
 //! Network Management Entity
 //!
-//! The NLME shall provide a management service to allow an application to interact with the stack.
+//! The NLME shall provide a management service to allow an application to
+//! interact with the stack.
 //!
 //! it provides:
 //! * configuring a new device
@@ -13,8 +14,18 @@
 //! * routing
 #![allow(dead_code)]
 
-use management::{NlmeEdScanConfirm, NlmeEdScanRequest, NlmeJoinConfirm, NlmeJoinRequest, NlmeNetworkDiscoveryConfirm, NlmeNetworkDiscoveryRequest, NlmeNetworkFormationConfirm, NlmeNetworkFormationRequest, NlmePermitJoiningConfirm, NlmePermitJoiningRequest, NlmeStartRouterConfirm, NlmeStartRouterRequest};
-
+use management::NlmeEdScanConfirm;
+use management::NlmeEdScanRequest;
+use management::NlmeJoinConfirm;
+use management::NlmeJoinRequest;
+use management::NlmeNetworkDiscoveryConfirm;
+use management::NlmeNetworkDiscoveryRequest;
+use management::NlmeNetworkFormationConfirm;
+use management::NlmeNetworkFormationRequest;
+use management::NlmePermitJoiningConfirm;
+use management::NlmePermitJoiningRequest;
+use management::NlmeStartRouterConfirm;
+use management::NlmeStartRouterRequest;
 
 pub mod management;
 
@@ -22,12 +33,19 @@ pub mod management;
 ///
 /// 3.2.2
 ///
-/// allows the transport of management commands between the next higher layer and the NLME.
+/// allows the transport of management commands between the next higher layer
+/// and the NLME.
 pub trait NlmeSap {
     /// 3.2.2.3
-    fn network_discovery(&self, request: NlmeNetworkDiscoveryRequest) -> NlmeNetworkDiscoveryConfirm;
+    fn network_discovery(
+        &self,
+        request: NlmeNetworkDiscoveryRequest,
+    ) -> NlmeNetworkDiscoveryConfirm;
     /// 3.2.2.5
-    fn network_formation(&self, request: NlmeNetworkFormationRequest) -> NlmeNetworkFormationConfirm;
+    fn network_formation(
+        &self,
+        request: NlmeNetworkFormationRequest,
+    ) -> NlmeNetworkFormationConfirm;
     /// 3.2.2.7
     fn permit_joining(&self, request: NlmePermitJoiningRequest) -> NlmePermitJoiningConfirm;
     /// 3.2.2.9
@@ -38,23 +56,27 @@ pub trait NlmeSap {
     fn join(&self, request: NlmeJoinRequest) -> NlmeJoinConfirm;
 }
 
-pub(crate) struct Nlme {
-
-}
+pub(crate) struct Nlme {}
 
 impl Nlme {
     pub(crate) fn new() -> Self {
-        Self {  }
+        Self {}
     }
 }
 
 impl NlmeSap for Nlme {
-    fn network_discovery(&self, _request: NlmeNetworkDiscoveryRequest) -> NlmeNetworkDiscoveryConfirm {
+    fn network_discovery(
+        &self,
+        _request: NlmeNetworkDiscoveryRequest,
+    ) -> NlmeNetworkDiscoveryConfirm {
         // TODO: perform an active network scan
         todo!()
     }
 
-    fn network_formation(&self, _request: NlmeNetworkFormationRequest) -> NlmeNetworkFormationConfirm {
+    fn network_formation(
+        &self,
+        _request: NlmeNetworkFormationRequest,
+    ) -> NlmeNetworkFormationConfirm {
         todo!()
     }
 
@@ -77,4 +99,3 @@ impl NlmeSap for Nlme {
         todo!()
     }
 }
-

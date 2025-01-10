@@ -1,9 +1,12 @@
 #![allow(dead_code)]
 //!
 //! 2.2.4.4 Information Base Maintenance
-//! This set of primitives defines how the next higher layer of a device can read and write attributes in the AIB
-//!
-use crate::aps::{aib::{AIBAttribute, AIBAttributeValue}, types::{self, Address}};
+//! This set of primitives defines how the next higher layer of a device can
+//! read and write attributes in the AIB
+use crate::aps::aib::AIBAttribute;
+use crate::aps::aib::AIBAttributeValue;
+use crate::aps::types::Address;
+use crate::aps::types::{self};
 
 type DstAddrMode = u8;
 /// 2.2.4.3.1 - APSME-BIND.request
@@ -19,7 +22,8 @@ pub struct ApsmeBindRequest {
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum ApsmeBindRequestStatus {
-    #[default] Success,
+    #[default]
+    Success,
     IllegalRequest,
     TableFull,
     NotSupported,
@@ -50,7 +54,8 @@ pub struct ApsmeUnbindRequest {
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum ApsmeUnbindRequestStatus {
-    #[default] Success,
+    #[default]
+    Success,
     IllegalRequest,
     InvalidBinding,
 }
@@ -72,7 +77,6 @@ pub struct ApsmeGetRequest {
     attribute: AIBAttribute,
 }
 
-
 /// 2.2.4.4.2 - APSME-GET.confirm
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct ApsmeGetConfirm {
@@ -84,8 +88,9 @@ pub struct ApsmeGetConfirm {
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum ApsmeGetConfirmStatus {
-    #[default] Success,
-    UnsupportedAttribute
+    #[default]
+    Success,
+    UnsupportedAttribute,
 }
 
 /// 2.2.4.4.3 - APSME-SET.request
@@ -98,12 +103,11 @@ pub struct ApsmeSetRequest {
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum ApsmeSetConfirmStatus {
-    #[default] Success,
+    #[default]
+    Success,
     InvalidParameter,
-    UnsupportedAttribute
+    UnsupportedAttribute,
 }
-
-
 
 /// 2.2.4.4.4 - APSME-SET.confirm
 #[derive(Debug, Clone, Default, PartialEq)]

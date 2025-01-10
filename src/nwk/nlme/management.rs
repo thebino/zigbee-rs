@@ -4,7 +4,6 @@
 pub struct NlmeNetworkDiscoveryRequest {
     pub(crate) scan_channels_list_structure: [u8; 8],
     pub(crate) scan_duration: u8,
-
 }
 
 /// 3.2.2.4 - NLME-NETWORK-DISCOVERY.confirm
@@ -16,7 +15,7 @@ pub struct NlmeNetworkDiscoveryConfirm {
 
 #[derive(Debug, PartialEq)]
 pub(crate) enum NlmeNetworkDiscoveryStatus {
-    Successful
+    Successful,
 }
 
 pub struct NetworkDescriptor {
@@ -41,17 +40,14 @@ pub struct NlmeNetworkFormationConfirm {}
 /// 3.2.2.7 - NLME-PERMIT-JOINING.request
 pub struct NlmePermitJoiningRequest {}
 /// 3.2.2.8 - NLME-PERMIT-JOINING.confirm
-///
 pub struct NlmePermitJoiningConfirm {}
 /// 3.2.2.9 - NLME-START-ROUTER.request
 pub struct NlmeStartRouterRequest {}
 /// 3.2.2.10 - NLME-START-ROUTER.confirm
-///
 pub struct NlmeStartRouterConfirm {}
 /// 3.2.2.11 - NLME-ED-SCAN.request
 pub struct NlmeEdScanRequest {}
 /// 3.2.2.12 - NLME-ED-SCAN.confirm
-///
 pub struct NlmeEdScanConfirm {}
 /// 3.2.2.13 - NLME-JOIN.request
 pub struct NlmeJoinRequest {
@@ -77,7 +73,7 @@ pub struct NlmeJoinConfirm {
     pub(crate) extended_pan_id: u64,
     // Channel List Structure
     pub(crate) enhanced_beacon_type: bool,
-    pub(crate) mac_interface_index: u8
+    pub(crate) mac_interface_index: u8,
 }
 
 pub(crate) enum NlmeJoinStatus {
@@ -104,4 +100,3 @@ pub struct NlmeLeaveConfirm {}
 pub struct NlmeResetRequest {}
 /// 3.2.2.22 - NLME-RESET.confirm
 pub struct NlmeResetConfirm {}
-
