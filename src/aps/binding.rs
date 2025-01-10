@@ -50,7 +50,7 @@ impl ApsBindingTable {
                 cluster_id: request.cluster_id,
             }
         ).map_err(|_| BindingError::TableFull)
-    }
+   }
 
     pub(crate) fn remove_binding_link(&self, _request: &ApsmeUnbindRequest) -> Result<(), BindingError> {
         Err(BindingError::InvalidBinding)

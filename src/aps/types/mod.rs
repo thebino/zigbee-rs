@@ -1,35 +1,40 @@
 #![allow(dead_code)]
+
+use super::error::ApsError;
+
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum SrcAddrMode {
     Reserved = 0x00,
-    Short = 0x01,
+    #[default] Short,
     Extended = 0x02,
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum DstAddrMode {
-    None = 0x00,
+    #[default] None,
     Group = 0x01,
     Network = 0x02,
     Extended = 0x03,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum Address {
-    None,
+    #[default] None,
     Group(u16),
     Network(u16),
     Extended(u64),
 }
 
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum TxOptions {
     SecurityEnabled = 0x01,
     UseNetworkKey = 0x02,
-    Acknowledged = 0x04,
+    #[default] Acknowledged,
     FragmentationPermitted = 0x08,
     IncludeExtendedNonce = 0x10,
 }
 
-use super::error::ApsError;
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct SrcEndpoint {
     pub(crate) value: u8,
 }

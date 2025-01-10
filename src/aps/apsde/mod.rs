@@ -28,6 +28,7 @@ pub trait ApsdeSap {
     fn data_request(&self, request: ApsdeSapRequest) -> ApsdeSapConfirm;
 }
 
+#[derive(Debug, Clone, Default, PartialEq)]
 struct Apsde {
     pub(crate) supports_binding_table: bool,
 }
@@ -61,6 +62,7 @@ impl ApsdeSap for Apsde {
 }
 
 // 2.2.4.1.1
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ApsdeSapRequest {
     dst_addr_mode: DstAddrMode,
     dst_address: Address,
@@ -78,9 +80,10 @@ pub struct ApsdeSapRequest {
 }
 
 /// The status of the corresponding request.
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum ApsdeSapConfirmStatus {
     /// indicating that the request to transmit was successful
-    Success,
+    #[default] Success,
     /// No corresponding 16-bit NKW address found
     NoShortAddress,
     /// No binding table entries found with the respectively SrcEndpoint and ClusterId parameter
@@ -93,6 +96,7 @@ pub enum ApsdeSapConfirmStatus {
     AsduTooLong,
 }
 // 2.2.4.1.2
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ApsdeSapConfirm {
     pub dst_addr_mode: DstAddrMode,
     pub dst_address: Address,
@@ -102,19 +106,22 @@ pub struct ApsdeSapConfirm {
     pub tx_time: u8,
 }
 
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum ApsdeSapIndicationStatus {
-    Success,
+    #[default] Success,
     DefragUnsupported,
     DefragDeferred,
 }
 
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum SecurityStatus {
-    Unsecured,
+    #[default] Unsecured,
     SecuredNwkKey,
     SecuredLinkKey,
 }
 
 // 2.2.4.1.3
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct ApsdeSapIndication {
     dst_addr_mode: DstAddrMode,
     dst_address: u8,

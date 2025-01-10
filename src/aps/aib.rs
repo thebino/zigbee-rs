@@ -27,12 +27,12 @@ impl ApsInformationBase {
 pub type AIBAttributeValue = [u8; 8];
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum AIBAttribute {
-    ApsBindingTable,
+    #[default] ApsBindingTable,
     ApsDesignatedCoordinator(bool),
     ApsChannelMaskList(Vec<u8, 265>),
-    ApsUseExtendedPANID(u64),
+    ApsUseExtendedPanId(u64),
     ApsGroupTable(u8),
     ApsNonmemberRadius(u8),
     ApsUseInsecureJoin(bool),
@@ -51,7 +51,7 @@ impl AIBAttribute {
             AIBAttribute::ApsBindingTable => 0xc1,
             AIBAttribute::ApsDesignatedCoordinator(_) => 0xc2,
             AIBAttribute::ApsChannelMaskList(_) => 0xc3,
-            AIBAttribute::ApsUseExtendedPANID(_) => 0xc4,
+            AIBAttribute::ApsUseExtendedPanId(_) => 0xc4,
             AIBAttribute::ApsGroupTable(_)=> 0xc5,
             AIBAttribute::ApsNonmemberRadius(_)=> 0xc6,
             // 0xc7 removed (ApsIpIdPermissionsConfig)
@@ -74,7 +74,7 @@ impl AIBAttribute {
     pub fn value(&self) -> [u8; 8] {
         match self {
 
-           AIBAttribute::ApsUseExtendedPANID(id) => id.to_be_bytes(),
+           AIBAttribute::ApsUseExtendedPanId(id) => id.to_le_bytes(),
             _ => [0u8; 8]
         }
     }
