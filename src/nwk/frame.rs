@@ -1,15 +1,13 @@
-use core::{
-    fmt::Debug,
-    mem::{self},
-};
+//! NWK Frame Formats
+use core::fmt::Debug;
+use core::mem::{self};
 
 use heapless::Vec;
 
-use crate::{
-    address::{IeeeAddress, ShortAddress},
-    impl_pack_bytes,
-    parse::PackBytes,
-};
+use crate::common::parse::PackBytes;
+use crate::common::types::IeeeAddress;
+use crate::common::types::ShortAddress;
+use crate::impl_pack_bytes;
 
 /// 3.5.1.
 #[allow(dead_code)]
@@ -18,6 +16,7 @@ const PROTOCOL_VERSION: u8 = 0x02;
 const PAYLOAD_SIZE: usize = 128;
 
 #[derive(Debug)]
+#[allow(missing_docs)]
 pub enum NwkFrame {
     Data(NwkDataFrame),
     NwkCommand(NwkCommandFrame),
@@ -26,6 +25,7 @@ pub enum NwkFrame {
 }
 
 impl NwkFrame {
+    /// Return the [`FrameTypeIdentifier`] of a [`NwkFrame`].
     pub fn frame_type_identifier(&self) -> FrameTypeIdentifier {
         match self {
             Self::Data(nwk_data_frame) => {
@@ -35,8 +35,9 @@ impl NwkFrame {
                 .header
                 .frame_control
                 .frame_type_identifier(),
-            Self::Reserved(nwk_header) => nwk_header.frame_control.frame_type_identifier(),
-            Self::InterPan(nwk_header) => nwk_header.frame_control.frame_type_identifier(),
+            Self::Reserved(nwk_header) | Self::InterPan(nwk_header) => {
+                nwk_header.frame_control.frame_type_identifier()
+            }
         }
     }
 }
@@ -63,7 +64,11 @@ impl PackBytes for NwkFrame {
 }
 
 impl_pack_bytes! {
+    /// NWK Date Frame
+    ///
+    /// See Section 3.3.2.1.
     #[derive(Debug)]
+    #[allow(missing_docs)]
     pub struct NwkDataFrame {
         #[transparent(NwkHeader)]
         pub header: NwkHeader,
@@ -77,6 +82,7 @@ impl_pack_bytes! {
     ///
     /// See Section 3.3.2.2.
     #[derive(Debug)]
+    #[allow(missing_docs)]
     pub struct NwkCommandFrame {
         #[transparent(NwkHeader)]
         pub header: NwkHeader,
@@ -92,6 +98,7 @@ impl_pack_bytes! {
 /// See Section 3.4.
 //#[repr(u8)]
 #[derive(Debug, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum CommandFrameIdentifier {
     RouteRequest = 0x01,
     RouteReply = 0x02,
@@ -124,6 +131,7 @@ impl PackBytes for CommandFrameIdentifier {
 /// 3.3.1 General NPDU Frame Format
 #[derive(Debug)]
 pub struct NwkHeader {
+    /// See Section 3.3.1.1.
     pub frame_control: FrameControl,
     /// See Section 3.3.1.2.
     pub destination: ShortAddress,
@@ -199,6 +207,7 @@ impl Debug for FrameControl {
 }
 
 impl FrameControl {
+    /// See Section 3.3.1.1.
     pub fn frame_type_identifier(&self) -> FrameTypeIdentifier {
         // SAFETY: any 2 bit permutation is a valid FrameType
         unsafe { mem::transmute((self.0 & 0b11) as u8) }
@@ -229,25 +238,28 @@ impl FrameControl {
         ((self.0 >> 9) & 0b1) != 0
     }
 
-    /// The source route sub-field shall have a value of 1 if and only if a source route subframe
-    /// is present in the NWK header. If the source route subframe is not present, the source route
-    /// sub-field shall have a value of 0.
+    /// The source route sub-field shall have a value of 1 if and only if a
+    /// source route subframe is present in the NWK header. If the source
+    /// route subframe is not present, the source route sub-field shall have
+    /// a value of 0.
     ///
     /// See Section 3.3.1.1.6.
     pub fn source_flag(&self) -> bool {
         ((self.0 >> 10) & 0b1) != 0
     }
 
-    /// The destination IEEE address sub-field shall have a value of 1 if, and only if, the NWK
-    /// header is to include the full IEEE address of the destination.
+    /// The destination IEEE address sub-field shall have a value of 1 if, and
+    /// only if, the NWK header is to include the full IEEE address of the
+    /// destination.
     ///
     /// See Section 3.3.1.1.7.
     pub fn destination_ieee_flag(&self) -> bool {
         ((self.0 >> 11) & 0b1) != 0
     }
 
-    /// The source IEEE address sub-field shall have a value of 1 if, and only if, the NWK
-    /// header is to include the full IEEE address of the source device.
+    /// The source IEEE address sub-field shall have a value of 1 if, and only
+    /// if, the NWK header is to include the full IEEE address of the source
+    /// device.
     ///
     /// See Section 3.3.1.1.8.
     pub fn source_ieee_flag(&self) -> bool {
@@ -279,6 +291,7 @@ impl FrameControl {
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum DataTransmissionMethod {
     Unicast,
     Broadcast,
@@ -289,6 +302,7 @@ pub enum DataTransmissionMethod {
 /// 3.3.1.1.1 Frame Type Sub-Field
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum FrameTypeIdentifier {
     Data = 0b00,
     NwkCommand = 0b01,
@@ -298,6 +312,7 @@ pub enum FrameTypeIdentifier {
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum DiscoverRoute {
     Suppress,
     Enable,
@@ -344,8 +359,8 @@ impl MulticastControl {
         (self.0 >> 3) & 0b111
     }
 
-    /// The maximum value of the [`MulticastControl::non_member_radius`] sub-field for this frame.
-    /// See Section 3.3.1.8.3.
+    /// The maximum value of the [`MulticastControl::non_member_radius`]
+    /// sub-field for this frame. See Section 3.3.1.8.3.
     pub fn max_member_radius(&self) -> u8 {
         self.0 & 0b11
     }
@@ -353,6 +368,7 @@ impl MulticastControl {
 
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(missing_docs)]
 pub enum MulticastMode {
     NonMemberMode = 0b00,
     MemberMode = 0b01,
@@ -362,6 +378,7 @@ pub enum MulticastMode {
 const RELAY_LIST_SIZE: usize = 16;
 
 impl_pack_bytes! {
+    /// Source Route Subframe
     #[derive(Debug)]
     pub struct SourceRouteSubframe {
         /// Indicates the number of relays contained in [`SourceRouteSubframe::relay_list`].
@@ -409,7 +426,7 @@ mod tests {
 
     #[test]
     fn unpack_frame_control() {
-        let raw = [0b01111100, 0b00101010u8];
+        let raw = [0b0111_1100_u8, 0b0010_1010_u8];
 
         let frame_control = FrameControl::unpack_from_slice(&raw).unwrap();
         assert_eq!(
@@ -438,7 +455,7 @@ mod tests {
         assert!(header.frame_control.security_flag());
         assert!(header.frame_control.source_ieee_flag());
         assert_eq!(header.destination, ShortAddress(0xfffc));
-        assert_eq!(header.source_ieee, Some(IeeeAddress(0x00124b002a9a7166)));
+        assert_eq!(header.source_ieee, Some(IeeeAddress(0x0012_4b00_2a9a_7166)));
         assert_eq!(header.radius, 8);
         assert_eq!(header.sequence_number, 191);
     }

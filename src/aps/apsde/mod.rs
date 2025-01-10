@@ -1,7 +1,8 @@
 //! Application Support Sub-Layer Data Entity
 //!
-//! The APSDE shall provide a data service to the network layer and both ZDO and application
-//! objects to enable the transport of application PDUs between two or more devices.
+//! The APSDE shall provide a data service to the network layer and both ZDO and
+//! application objects to enable the transport of application PDUs between two
+//! or more devices.
 //!
 //! it will provide:
 //! * Generation of the application level PDU (APDU)
@@ -10,21 +11,24 @@
 //! * Reliable transport
 //! * Duplicate rejection
 //! * Fragmentation
-//!
 #![allow(dead_code)]
+use super::types::Address;
+use super::types::DstAddrMode;
+use super::types::SrcAddrMode;
+use super::types::TxOptions;
 use crate::aps::types;
-
-use super::types::{Address, DstAddrMode, SrcAddrMode, TxOptions};
 
 /// Application support sub-layer data entity – service access point
 ///
 /// 2.2.4.1.1
 ///
 /// Interface between the NWK (Network) layer and the APL (Application) layer
-/// through a general set of services for use by both the ZDO (device object) and the application.
+/// through a general set of services for use by both the ZDO (device object)
+/// and the application.
 pub trait ApsdeSap {
     /// 2.2.4.1.1 - APSDE-DATA.request  
-    /// Requests the transfer of a NHLE PDU from a local NHLE to one or more peer NHLE entities
+    /// Requests the transfer of a NHLE PDU from a local NHLE to one or more
+    /// peer NHLE entities
     fn data_request(&self, request: ApsdeSapRequest) -> ApsdeSapConfirm;
 }
 
@@ -40,7 +44,8 @@ impl ApsdeSap for Apsde {
             // TODO: search binding table with endpoint and cluster identifiers
             // request.src_endpoint.value
             // request.cluster_id
-            if false { // TODO if no binding table entries found
+            if false {
+                // TODO if no binding table entries found
                 ApsdeSapConfirmStatus::NoBoundDevice
             } else {
                 // TODO: fix
@@ -50,12 +55,12 @@ impl ApsdeSap for Apsde {
             // TODO: fix
             ApsdeSapConfirmStatus::NoAck
         };
-        ApsdeSapConfirm { 
-            dst_addr_mode: request.dst_addr_mode, 
-            dst_address: request.dst_address, 
-            dst_endpoint: request.dst_endpoint, 
+        ApsdeSapConfirm {
+            dst_addr_mode: request.dst_addr_mode,
+            dst_address: request.dst_address,
+            dst_endpoint: request.dst_endpoint,
             src_endpoint: request.src_endpoint,
-            status, 
+            status,
             tx_time: 0,
         }
     }
@@ -83,16 +88,19 @@ pub struct ApsdeSapRequest {
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum ApsdeSapConfirmStatus {
     /// indicating that the request to transmit was successful
-    #[default] Success,
+    #[default]
+    Success,
     /// No corresponding 16-bit NKW address found
     NoShortAddress,
-    /// No binding table entries found with the respectively SrcEndpoint and ClusterId parameter
+    /// No binding table entries found with the respectively SrcEndpoint and
+    /// ClusterId parameter
     NoBoundDevice,
     /// the security processing failed
     SecurityFail,
     /// one or more APS acknowledgements were not correctly received
     NoAck,
-    /// ASDU to be transmitted is larger than will fit in a single frame and fragmentation is not possible
+    /// ASDU to be transmitted is larger than will fit in a single frame and
+    /// fragmentation is not possible
     AsduTooLong,
 }
 // 2.2.4.1.2
@@ -108,14 +116,16 @@ pub struct ApsdeSapConfirm {
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum ApsdeSapIndicationStatus {
-    #[default] Success,
+    #[default]
+    Success,
     DefragUnsupported,
     DefragDeferred,
 }
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum SecurityStatus {
-    #[default] Unsecured,
+    #[default]
+    Unsecured,
     SecuredNwkKey,
     SecuredLinkKey,
 }

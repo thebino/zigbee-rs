@@ -9,9 +9,10 @@ pub struct Config {
 #[derive(Default)]
 pub enum DiscoveryType {
     #[default]
-    /// The IEEE address request is unicast to a particular device and assumes the NWK address is known. 
+    /// The IEEE address request is unicast to a particular device and assumes
+    /// the NWK address is known.
     IEEE,
-    /// The NWK address request is broadcast and carries the known IEEE address as data payload.
-    NWK
+    /// The NWK address request is broadcast and carries the known IEEE address
+    /// as data payload.
+    NWK,
 }
-

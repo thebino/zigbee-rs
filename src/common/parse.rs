@@ -57,9 +57,9 @@ macro_rules! impl_pack_bytes {
         $(#[$m])*
         $v struct $name($vt $ty);
 
-        impl $crate::parse::PackBytes for $name {
+        impl $crate::common::parse::PackBytes for $name {
             fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
-                Some(Self($crate::parse::PackBytes::unpack_from_iter(src)?))
+                Some(Self($crate::common::parse::PackBytes::unpack_from_iter(src)?))
             }
         }
     };
@@ -83,7 +83,7 @@ macro_rules! impl_pack_bytes {
             ),+
         }
 
-        impl $crate::parse::PackBytes for $name {
+        impl $crate::common::parse::PackBytes for $name {
             fn unpack_from_iter(src: impl IntoIterator<Item = u8>) -> Option<Self> {
                 use core::iter::FromIterator;
                 let mut src = src.into_iter();

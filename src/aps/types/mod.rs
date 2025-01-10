@@ -5,13 +5,15 @@ use super::error::ApsError;
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum SrcAddrMode {
     Reserved = 0x00,
-    #[default] Short,
+    #[default]
+    Short,
     Extended = 0x02,
 }
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum DstAddrMode {
-    #[default] None,
+    #[default]
+    None,
     Group = 0x01,
     Network = 0x02,
     Extended = 0x03,
@@ -19,7 +21,8 @@ pub enum DstAddrMode {
 
 #[derive(Debug, Clone, Default, PartialEq)]
 pub enum Address {
-    #[default] None,
+    #[default]
+    None,
     Group(u16),
     Network(u16),
     Extended(u64),
@@ -29,7 +32,8 @@ pub enum Address {
 pub enum TxOptions {
     SecurityEnabled = 0x01,
     UseNetworkKey = 0x02,
-    #[default] Acknowledged,
+    #[default]
+    Acknowledged,
     FragmentationPermitted = 0x08,
     IncludeExtendedNonce = 0x10,
 }

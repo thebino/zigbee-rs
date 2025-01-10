@@ -26,7 +26,7 @@ pub(crate) struct NodeDescriptor {
 #[derive(Default)]
 #[repr(u8)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum LogicalType{
+pub enum LogicalType {
     Coordinator = 0b000,
     Router = 0b001,
     #[default]
@@ -36,12 +36,11 @@ pub enum LogicalType{
 
 /// 2.3.2.3.5 - Frequency Band Field
 #[repr(u8)]
-pub(crate) enum FrequencyBand{
+pub(crate) enum FrequencyBand {
     /// 868 - 868.6 MHz
     Low = 0,
 
     // reserved = 1
-
     /// 902 - 928 MHz
     Mid = 2,
 
@@ -66,7 +65,7 @@ pub(crate) enum ServerMaskField {
 pub enum DescriptorCapabilityField {
     ExtendedActiveEndpointListAvailable = 0,
     ExtendedSimpleDescriptorListAvailable = 1,
-    // Reserved = 2–7 
+    // Reserved = 2–7
 }
 
 /// 2.3.2.4 - Node Power Descriptor
@@ -97,7 +96,7 @@ pub enum PowerSource {
 
 /// 2.3.2.4.4 - Current Power Source Level Field
 #[repr(u8)]
-pub enum PowerLevel{
+pub enum PowerLevel {
     Critical = 0b0000,
     /// 33%
     Low = 0b0100,
@@ -118,7 +117,6 @@ pub struct SimpleDescriptor {
 }
 
 /// 2.3.2.7 - User Descriptor
-pub struct UserDescriptor{
-    pub descriptor: [u8; 16]
+pub struct UserDescriptor {
+    pub descriptor: [u8; 16],
 }
-
