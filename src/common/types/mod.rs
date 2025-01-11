@@ -5,27 +5,30 @@ use heapless::FnvIndexSet;
 use crate::impl_pack_bytes;
 
 impl_pack_bytes! {
+    /// 16-bit network address
     #[derive(Clone, Copy, PartialEq, Eq)]
     pub struct ShortAddress(pub u16);
 }
 
 impl fmt::Debug for ShortAddress {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "ShortAddress(0x{:04x})", self.0)
     }
 }
 
 impl_pack_bytes! {
+    /// 64-bit network address
     #[derive(Clone, Copy, PartialEq, Eq)]
     pub struct IeeeAddress(pub u64);
 }
 
 impl fmt::Debug for IeeeAddress {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "IeeeAddress(0x{:016x})", self.0)
     }
 }
 
+/// Specifies the node capabilities
 pub struct MacCapabilityFlagsField(u8);
 
 /// 2.3.2.3.6 - MAC Capability Flags Field
@@ -66,14 +69,14 @@ impl MacCapabilityFlagsField {
     fn new(capabilities: FnvIndexSet<MacCapability, 8>) -> Self {
         let mut value: u8 = 0;
         for capa in capabilities.iter() {
-            value |= 1 << *capa as u8
+            value |= 1 << *capa as u8;
         }
 
         Self(value)
     }
 
     fn is_set(&self, capability: MacCapability) -> bool {
-        return (self.0 & (1 << capability as u8)) != 0;
+        (self.0 & (1 << capability as u8)) != 0
     }
 }
 

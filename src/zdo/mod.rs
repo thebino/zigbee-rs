@@ -3,14 +3,17 @@ use config::Config;
 pub mod config;
 use crate::aps::apsme::Apsme;
 
+/// provides an interface between the appication object, the device profile and the APS
 pub struct ZigbeeDevice {
     config: Config,
     apsme: Apsme,
 }
 
+/// zigbee network
 pub struct ZigBeeNetwork {}
 
 impl ZigbeeDevice {
+    /// creates a new instance
     pub fn new() -> Self {
         Self {
             config: Config::default(),
@@ -18,22 +21,25 @@ impl ZigbeeDevice {
         }
     }
 
-    pub fn configure(&self, config: Config) {}
+    /// configures the device
+    pub fn configure(&self, _config: Config) {}
 
     /// Indicates if the device is connected to a zigbee network
     pub fn is_connected(&self) -> bool {
         false // TODO: check connection state
     }
 
+    /// scans for nearby reachable networks by sending a beacon request
     pub fn scan_for_available_networks(&self) {
-        self.apsme.start_network_discovery()
+        self.apsme.start_network_discovery();
         // TODO: send beacon requests to actively scan for networks
         // TODO: Beacon response (signal strenght - RSSI, network PAN ID, permit
         // to join)
     }
 
+    /// tries to connect to the first reachable network by sending a join request
     pub fn try_to_connect(&self) {
-        self.apsme.join_network()
+        self.apsme.join_network();
         // TODO: send Association request to choosen network coordinator or
         // router TODO coordinator/router responds with an association
         // confirmation

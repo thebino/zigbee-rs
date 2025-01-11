@@ -27,6 +27,7 @@ use management::NlmePermitJoiningRequest;
 use management::NlmeStartRouterConfirm;
 use management::NlmeStartRouterRequest;
 
+/// Network management entity
 pub mod management;
 
 /// Network management service - service access point
@@ -96,6 +97,12 @@ impl NlmeSap for Nlme {
         // Figure 3-39
         // TODO: update neighbor table if join is successful
         // TODO: start routing (3.6.4.1)
-        todo!()
+        NlmeJoinConfirm {
+            status: management::NlmeJoinStatus::InvalidRequest,
+            network_address: 0u16,
+            extended_pan_id: 0u64,
+            enhanced_beacon_type: false,
+            mac_interface_index: 0u8,
+        }
     }
 }

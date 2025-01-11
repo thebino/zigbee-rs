@@ -1,11 +1,15 @@
+/// zigbee configuration
 #[derive(Default)]
 pub struct Config {
+    /// The radio channel to operate on
     pub radio_channel: u8,
-    pub device_discovery_type: crate::zdo::config::DiscoveryType,
+    /// Discovery type
+    pub device_discovery_type: DiscoveryType,
     /// This indicates the device class
     pub device_type: crate::apl::descriptors::LogicalType,
 }
 
+/// Discovery Type
 #[derive(Default)]
 pub enum DiscoveryType {
     #[default]

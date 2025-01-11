@@ -19,8 +19,8 @@ impl ApsInformationBase {
 
     pub fn write_attribute_value(
         &mut self,
-        id: u8,
-        value: AIBAttribute,
+        _id: u8,
+        _value: AIBAttribute,
     ) -> Result<(), &'static str> {
         // self.attributes.insert(id, value).map_err(|_| "could not insert");
 

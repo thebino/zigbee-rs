@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(missing_docs)]
 //!
 //! 2.2.4.4 Information Base Maintenance
 //! This set of primitives defines how the next higher layer of a device can
@@ -20,7 +21,7 @@ pub struct ApsmeBindRequest {
     pub dst_endpoint: u8,
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ApsmeBindRequestStatus {
     #[default]
     Success,
@@ -52,7 +53,7 @@ pub struct ApsmeUnbindRequest {
     pub(crate) dst_endpoint: u8,
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ApsmeUnbindRequestStatus {
     #[default]
     Success,
@@ -78,7 +79,7 @@ pub struct ApsmeGetRequest {
 }
 
 /// 2.2.4.4.2 - APSME-GET.confirm
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ApsmeGetConfirm {
     pub(crate) status: ApsmeGetConfirmStatus,
     pub(crate) attribute: u8,
@@ -86,7 +87,7 @@ pub struct ApsmeGetConfirm {
     pub(crate) attribute_value: Option<AIBAttributeValue>,
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ApsmeGetConfirmStatus {
     #[default]
     Success,
@@ -101,7 +102,7 @@ pub struct ApsmeSetRequest {
     attribute_value: AIBAttributeValue,
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub enum ApsmeSetConfirmStatus {
     #[default]
     Success,
@@ -110,30 +111,30 @@ pub enum ApsmeSetConfirmStatus {
 }
 
 /// 2.2.4.4.4 - APSME-SET.confirm
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ApsmeSetConfirm {
     pub(crate) status: ApsmeSetConfirmStatus,
     pub(crate) identifier: u8,
 }
 
 /// 2.2.4.5.1 - APSME-ADD-GROUP.request
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ApsmeAddGroupRequest {}
 
 /// 2.2.4.5.2 - APSME-ADD-GROUP.confirm
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ApsmeAddGroupConfirm {}
 
 /// 2.2.4.5.3 - APSME-REMOVE-GROUP.request
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ApsmeRemoveGroupRequest {}
 /// 2.2.4.5.3 - APSME-REMOVE-GROUP.request
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ApsmeRemoveGroupConfirm {}
 
 /// 2.2.4.5.5 - APSME-REMOVE-ALL-GROUPS.request
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ApsmeRemoveAllGroupsRequest {}
 /// 2.2.4.5.6 - APSME-REMOVE-ALL-GROUPs.request
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ApsmeRemoveAllGroupsConfirm {}

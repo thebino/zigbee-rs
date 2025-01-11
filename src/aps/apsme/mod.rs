@@ -77,7 +77,7 @@ pub(crate) struct Apsme {
 }
 
 impl Apsme {
-    pub(crate) fn new() -> Apsme {
+    pub(crate) fn new() -> Self {
         Self {
             supports_binding_table: true,
             binding_table: ApsBindingTable::new(),
@@ -106,19 +106,16 @@ impl Apsme {
 
     pub(crate) fn join_network(&self) {
         let request = NlmeJoinRequest {
-            extended_pan_id: 0x00158D0001ABCD12,
+            extended_pan_id: 0x0015_8D00_01AB_CD12,
             rejoin_network: 0u8,
             scan_duration: 10u8,
             security_enabled: false,
         };
         let confirm = self.nwk.join(request);
-        match confirm.status {
-            NlmeJoinStatus::Success => {
-                // confirm.extended_pan_id
-            }
-            _ => {
-                // TODO: handle errors
-            }
+        if let NlmeJoinStatus::Success = confirm.status {
+            // confirm.extended_pan_id
+        } else {
+            // TODO: handle errors
         }
     }
 
@@ -195,29 +192,26 @@ impl ApsmeSap for Apsme {
     // 2.2.4.4.1 APSME-GET.request
     fn get(&self, identifier: u8) -> ApsmeGetConfirm {
         let attr = self.aib.get_attribute(identifier);
-        return match attr {
-            Some(attr) => ApsmeGetConfirm {
-                status: ApsmeGetConfirmStatus::Success,
-                attribute: attr.id(),
-                attribute_length: attr.length(),
-                attribute_value: Some(attr.value()),
-            },
-            None => ApsmeGetConfirm {
+        attr.map_or(ApsmeGetConfirm {
                 status: ApsmeGetConfirmStatus::UnsupportedAttribute,
                 attribute: identifier,
                 attribute_length: 0,
                 attribute_value: None,
-            },
-        };
+            }, |attr| ApsmeGetConfirm {
+                status: ApsmeGetConfirmStatus::Success,
+                attribute: attr.id(),
+                attribute_length: attr.length(),
+                attribute_value: Some(attr.value()),
+            })
     }
 
     // 2.2.4.4.3 APSME-SET.request
     fn set(&mut self, attribute: AIBAttribute) -> ApsmeSetConfirm {
-        let id = attribute.id().clone();
-        match self.aib.write_attribute_value(id.clone(), attribute) {
+        let id = attribute.id();
+        match self.aib.write_attribute_value(id, attribute) {
             Ok(_) => ApsmeSetConfirm {
                 status: basemgt::ApsmeSetConfirmStatus::Success,
-                identifier: id.clone(),
+                identifier: id,
             },
             Err(_) => todo!(),
         }

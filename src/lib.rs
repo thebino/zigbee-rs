@@ -11,16 +11,13 @@
 //! ```rust
 //! let zigbee_device = zigbee::init(zigbee::Config { radio_channel: 11, ..Default::default() });
 //!
-//! let temperature_sensor = zigbee;
-//! let _ = zigbee_device.register(temperature_sensor);
-//! let available_networks: Vec<zigbee::ZigBeeNetwork> = zigbee_device.scanning_networks();
-//! let parent_device = available_networks[0].device[0];
-//! let response = parent_device.request_to_join();
+//! zigbee_device.try_to_connect();
+//! zigbee_device.send_data(&[0x7au8]);
 //! ```
 //!
 //! # ESP32 & nRF support
 //!
-//! This crate is currently only supporting devices in the Espressif ecosystem,
+//! This crate is currently only supporting devices in the EspresGM_Clamshell Parts Box Thirdssif ecosystem,
 //! but presumative this will expand to nordics nRF series.
 #![no_std]
 //#![deny(clippy::unwrap_used)]
