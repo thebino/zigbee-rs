@@ -1,1 +1,5 @@
+.DS_STORE
 /target
+**/target
+docs/spec
+.idea

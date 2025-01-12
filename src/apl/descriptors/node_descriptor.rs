@@ -2,10 +2,11 @@
 //!
 //! The node descriptor contains information about the capabilities of the ZigBee node and is mandatory for each node.  There shall be only one node descriptor in a node.  
 
-use crate::common::types::macros::bitfield_bits;
 use heapless::FnvIndexSet;
 use heapless::Vec;
 use strum::EnumCount;
+
+use crate::common::types::macros::bitfield_bits;
 
 const NODE_DESCRIPTOR_SIZE: usize = 13;
 
@@ -33,7 +34,7 @@ impl NodeDescriptor {
 
         let byte_1: u8 = frequency_bands.0;
 
-        let byte_2 = mac_capabilities.0;
+        let byte_2: u8 = mac_capabilities.0;
 
         let byte_3: u8 = (manufacturer_code >> 8) as u8;
         let byte_4: u8 = manufacturer_code as u8;
@@ -119,19 +120,19 @@ impl NodeDescriptor {
 #[repr(u8)]
 #[derive(Debug, Default, PartialEq)]
 pub enum LogicalType {
+    Coordinator = 0b000,
+    Router = 0b001,
     #[default]
-    ZigBeeCoordinator = 0b000,
-    ZigBeeRouter = 0b001,
-    ZigBeeEndDevice = 0b010,
+    EndDevice = 0b010,
     // 011 - 111 reserved
 }
 
 impl From<u8> for LogicalType {
     fn from(value: u8) -> Self {
         match value {
-            0b000 => LogicalType::ZigBeeCoordinator,
-            0b001 => LogicalType::ZigBeeRouter,
-            0b010 => LogicalType::ZigBeeEndDevice,
+            0b000 => LogicalType::Coordinator,
+            0b001 => LogicalType::Router,
+            0b010 => LogicalType::EndDevice,
             _ => panic!("Invalid LogicalType value"),
         }
     }
@@ -450,7 +451,7 @@ mod tests {
     #[test]
     fn creating_node_descriptor_should_succeed() {
         // given
-        let logical_type = LogicalType::ZigBeeRouter;
+        let logical_type = LogicalType::Router;
         let complex_descriptor_available = true;
         let user_descriptor_available = true;
         let frequency_band_flags = bitfield_bits!(
@@ -497,7 +498,7 @@ mod tests {
         );
 
         // then
-        assert_eq!(node_descriptor.logical_type(), LogicalType::ZigBeeRouter);
+        assert_eq!(node_descriptor.logical_type(), LogicalType::Router);
         assert!(node_descriptor.complex_descriptor_available());
         assert!(node_descriptor.user_descriptor_available());
         assert!(node_descriptor

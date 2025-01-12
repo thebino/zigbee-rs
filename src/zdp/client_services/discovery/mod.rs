@@ -1,13 +1,13 @@
 #![allow(dead_code)]
 
 use crate::common::types::{IeeeAddress, NwkAddress};
-use crate::zaf::descriptors::node_descriptor::{MacCapabilities, NodeDescriptor, ServerMask};
+use crate::apl::descriptors::node_descriptor::{MacCapabilities, NodeDescriptor, ServerMask};
 
 use heapless::Vec;
 
 const CLUSTER_LIST_SIZE: usize = 2 * 0xffff;
 
-// 2.4.3.1.1 NWK_addr_req
+/// 2.4.3.1.1 NWK_addr_req
 pub struct NWKAddrReq {
     /// The IEEE address to be matched by the Remote Device
     ieee_address: IeeeAddress,
@@ -22,7 +22,7 @@ pub struct NWKAddrReq {
     start_index: u8,
 }
 
-// 2.4.3.1.2 IEEE_addr_req
+/// 2.4.3.1.2 IEEE_addr_req
 pub struct IeeeAddrReq {
     /// NWK address that is used for IEEE address mapping.
     nwk_addr_of_interest: NwkAddress,
@@ -37,19 +37,19 @@ pub struct IeeeAddrReq {
     start_index: u8,
 }
 
-// 2.4.3.1.3 Node_Desc_req
+/// 2.4.3.1.3 Node_Desc_req
 pub struct NodeDescReq {
     /// NWK address for the request
     nwk_addr_of_interest: NwkAddress,
 }
 
-// 2.4.3.1.4 Power_Desc_req
+/// 2.4.3.1.4 Power_Desc_req
 pub struct PowerDescReq {
     /// NWK address for the request
     nwk_addr_of_interest: NwkAddress,
 }
 
-// 2.4.3.1.5 Simple_Desc_req
+/// 2.4.3.1.5 Simple_Desc_req
 pub struct SimpleDescReq {
     /// NWK address for the request
     nwk_addr_of_interest: NwkAddress,
@@ -57,13 +57,13 @@ pub struct SimpleDescReq {
     endpoint: u8,
 }
 
-// 2.4.3.1.6 Active_EP_req
+/// 2.4.3.1.6 Active_EP_req
 pub struct ActivePeReq {
     /// NWK address for the request
     nwk_addr_of_interest: NwkAddress,
 }
 
-// 2.4.3.1.7 Match_Desc_req
+/// 2.4.3.1.7 Match_Desc_req
 pub struct MatchDescReq {
     /// NWK address for the request
     nwk_addr_of_interest: NwkAddress,
@@ -86,19 +86,19 @@ pub struct MatchDescReq {
     out_cluster_list: Vec<u16, CLUSTER_LIST_SIZE>,
 }
 
-// 2.4.3.1.8 Complex_Desc_req
+/// 2.4.3.1.8 Complex_Desc_req
 pub struct ComplexDescReq {
     /// NWK address for the request
     nwk_addr_of_interest: NwkAddress,
 }
 
-// 2.4.3.1.9 User_Desc_req
+/// 2.4.3.1.9 User_Desc_req
 pub struct UserDescReq {
     /// NWK address for the request
     nwk_addr_of_interest: NwkAddress,
 }
 
-// 2.4.3.1.11 Device_annce
+/// 2.4.3.1.11 Device_annce
 pub struct DeviceAnnce {
     /// NWK address for the Local Device
     nwk_addr: NwkAddress,
@@ -108,7 +108,7 @@ pub struct DeviceAnnce {
     capability: MacCapabilities,
 }
 
-// 2.4.3.1.11 Parent_annce
+/// 2.4.3.1.11 Parent_annce
 pub struct ChildInfo(IeeeAddress);
 
 pub struct ParentAnnce {
@@ -128,12 +128,12 @@ pub struct UserDescSet {
     user_description: Vec<u8, 255>,
 }
 
-// 2.4.3.1.14 System_Server_Discovery_req
+/// 2.4.3.1.14 System_Server_Discovery_req
 pub struct SystemServerDiscoveryReq {
     server_mask: ServerMask,
 }
 
-// 2.4.3.1.15 Discovery_store_req
+/// 2.4.3.1.15 Discovery_store_req
 pub struct DiscoveryStoreReq {
     /// NWK Address for the Local Device.
     nwk_addr: NwkAddress,
@@ -152,7 +152,7 @@ pub struct DiscoveryStoreReq {
     simple_desc_size_list: Vec<u8, 255>,
 }
 
-// 2.4.3.1.16 Node_Desc_store_req
+/// 2.4.3.1.16 Node_Desc_store_req
 pub struct NodeDescStoreReq {
     /// NWK Address for the Local Device
     nwk_addr: NwkAddress,

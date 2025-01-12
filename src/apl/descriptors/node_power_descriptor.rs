@@ -4,12 +4,12 @@
 //! There shall be only one node power descriptor in a node.
 //!
 
-use crate::common::types::macros::bitfield_bits;
 use heapless::FnvIndexSet;
 use heapless::Vec;
 use strum::EnumCount;
 
-use super::error::Error;
+use crate::apl::descriptors::error::Error;
+use crate::common::types::macros::bitfield_bits;
 
 const NODE_POWER_DESCRIPTOR_SIZE: usize = 2;
 

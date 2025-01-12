@@ -1,5 +1,3 @@
-pub struct IeeeAddress(u64);
-
 pub type NwkAddress = u16;
 
 pub mod macros {
@@ -17,4 +15,32 @@ pub mod macros {
     }};
 }
     pub(crate) use bitfield_bits;
+}
+
+use core::fmt;
+
+use crate::impl_pack_bytes;
+
+impl_pack_bytes! {
+    /// 16-bit network address
+    #[derive(Clone, Copy, PartialEq, Eq)]
+    pub struct ShortAddress(pub u16);
+}
+
+impl fmt::Debug for ShortAddress {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ShortAddress(0x{:04x})", self.0)
+    }
+}
+
+impl_pack_bytes! {
+    /// 64-bit network address
+    #[derive(Clone, Copy, PartialEq, Eq)]
+    pub struct IeeeAddress(pub u64);
+}
+
+impl fmt::Debug for IeeeAddress {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "IeeeAddress(0x{:016x})", self.0)
+    }
 }

@@ -6,4 +6,5 @@
 
 pub mod node_descriptor;
 pub mod node_power_descriptor;
+pub mod simple_descriptor;
 pub mod error;
