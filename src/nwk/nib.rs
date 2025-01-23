@@ -1,0 +1,18 @@
+//! NWK information base
+//!
+//! See Section 3.5.
+#![allow(dead_code)]
+
+const NWKC_COORDINATOR_CAPABLE: bool = true;
+const NWKC_DEFAULT_SECURITY_LEVEL: u8 = 0x00;
+const NWKC_MIN_HEADER_OVERHEAD: u8 = 0x08;
+const NWKC_PROTOCOL_VERSION: u8 = 0x02;
+const NWKC_WAIT_BEFORE_VALIDATION: u32 = 0x9c40;
+const NWKC_ROUTE_DISCOVERY_TIME: u32 = 0x4c4b4;
+const NWKC_MAX_BROADCAST_JITTER: u32 = 0x7d0;
+const NWKC_INITIAL_RREQ_RETRIES: u8 = 0x03;
+const NWKC_RREQ_RETRIES: u8 = 0x02;
+const NWKC_RREQ_RETRY_INTERVAL: u32 = 0x1f02;
+const NWKC_MIN_RREQ_JITTER: u32 = 0x3f;
+const NWKC_MAX_RREQ_JITTER: u32 = 0xfa0;
+const NWKC_MAC_FRAME_OVERHEAD: u8 = 0x0b;
