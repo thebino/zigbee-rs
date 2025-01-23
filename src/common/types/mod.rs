@@ -10,8 +10,14 @@ impl_pack_bytes! {
 }
 
 impl fmt::Debug for ShortAddress {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "ShortAddress(0x{:04x})", self.0)
+    }
+}
+
+impl Default for ShortAddress {
+    fn default() -> Self {
+        Self(0xffff)
     }
 }
 
@@ -21,8 +27,14 @@ impl_pack_bytes! {
 }
 
 impl fmt::Debug for IeeeAddress {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "IeeeAddress(0x{:016x})", self.0)
+    }
+}
+
+impl Default for IeeeAddress {
+    fn default() -> Self {
+        Self(Default::default())
     }
 }
 
