@@ -45,6 +45,7 @@
     clippy::ignored_unit_patterns
 )]
 
+pub mod zdp;
 pub(crate) mod common;
 pub use common::types;
 
@@ -56,7 +57,6 @@ pub mod aps;
 pub mod apl;
 
 mod zdo;
-pub use apl::descriptors::LogicalType;
 pub use zdo::config::Config;
 pub use zdo::config::DiscoveryType;
 pub use zdo::ZigBeeNetwork;
